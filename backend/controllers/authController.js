@@ -2,28 +2,29 @@ import User from "../models/user.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { generateToken } from "../utils/signin.js";
 
-export const signup = async (req, res) => {
+export const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-
+    console.log("Generated OTP:", otp);
     let user = await User.findOne({ email });
-
+    console.log("User found:", user);
     if (!user) {
       user = await User.create({
         email,
         otp,
         otpExpiry: Date.now() + 5 * 60 * 1000
       });
+      console.log("New user created:", user);
     } else {
       user.otp = otp;
       user.otpExpiry = Date.now() + 5 * 60 * 1000;
       await user.save();
     }
-
+    console.log("1");
     await sendEmail(email, otp);
-
+    console.log("2");
     res.json({ message: "OTP sent successfully" });
 
   } catch (err) {
@@ -38,13 +39,22 @@ export const verifyOtp = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    if (!user || user.otp !== otp || user.otpExpiry < Date.now()) {
-      return res.status(400).json({ message: "Invalid OTP" });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
     }
 
-    res.json({ message: "OTP verified" });
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: "Incorrect OTP" });
+    }
+
+    if (user.otpExpiry < Date.now()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
+
+    res.json({ message: "OTP verified successfully" });
 
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Error verifying OTP" });
   }
 };
