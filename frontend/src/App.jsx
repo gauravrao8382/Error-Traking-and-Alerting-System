@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -12,70 +13,93 @@ import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import Footer from './components/Footer';
 
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
-
-// Public Route (redirect to dashboard if logged in)
-const PublicRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return !isAuthenticated ? children : <Navigate to="/dashboard" />;
-};
-
 function App() {
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+
+        if (decoded.exp * 1000 < Date.now()) {
+          handleLogout();
+        } else {
+          const storedUser = localStorage.getItem("user");
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
+        }
+
+      } catch (err) {
+        handleLogout();
+      }
+    }
+
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-xl font-bold">
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <div className="min-h-screen text-gray-800">
         <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={
-            <PublicRoute>
-              <>
-                <Navbar />
-                <Hero />
-                <Features />
-                <About />
-                <Pricing />
-                <Contact />
-                <Footer />
-              </>
-            </PublicRoute>
-          } />
-          
-          <Route path="/login" element={
-            <PublicRoute>
-              <>
-                <Navbar />
-                <Login />
-                <Footer />
-              </>
-            </PublicRoute>
-          } />
-          
-          <Route path="/signup" element={
-            <PublicRoute>
-              <>
-                <Navbar />
-                <Signup />
-                <Footer />
-              </>
-            </PublicRoute>
-          } />
 
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
+          {/* HOME */}
+          <Route path="/" element={!user ? (
+            <>
+              <Navbar />
+              <Hero />
+              <Features />
+              <About />
+              <Contact />
+              <Pricing />
+              <Footer />
+            </>
+          ) : <Navigate to="/dashboard" />} />
 
-          {/* Catch all - redirect to home */}
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* LOGIN */}
+          <Route path="/login" element={!user ? (
+            <>
+              <Navbar />
+              <Login setUser={setUser} />
+              <Footer />
+            </>
+          ) : <Navigate to="/dashboard" />} />
+
+          {/* SIGNUP */}
+          <Route path="/signup" element={!user ? (
+            <>
+              <Navbar />
+              <Signup />
+              <Footer />
+            </>
+          ) : <Navigate to="/dashboard" />} />
+
+          {/* DASHBOARD */}
+          <Route path="/dashboard" element={user ? (
+            <Dashboard />
+          ) : <Navigate to="/login" />} />
+
         </Routes>
-      </Router>
-    </AuthProvider>
+      </div>
+    </Router>
   );
 }
 
