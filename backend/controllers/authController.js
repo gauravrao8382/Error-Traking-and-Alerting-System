@@ -1,3 +1,5 @@
+import bcrypt from "bcryptjs";
+
 import User from "../models/user.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { generateToken } from "../utils/signin.js";
@@ -51,6 +53,11 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "OTP expired" });
     }
 
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+
+    await user.save();
     res.json({ message: "OTP verified successfully" });
 
   } catch (err) {
@@ -62,31 +69,59 @@ export const verifyOtp = async (req, res) => {
 
 export const completeSignup = async (req, res) => {
   try {
-    const { email, name, college, passingYear, skills } = req.body;
+    const { email, name, password, location, experience } = req.body;
 
+    // 🔍 check user exists
     const user = await User.findOne({ email });
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 🔒 check OTP verified
+    if (!user.isVerified) {
+      return res.status(400).json({ message: "Please verify OTP first" });
+    }
+
+    // 🚫 prevent re-signup
+    if (user.name) {
+      return res.status(400).json({ message: "Signup already completed" });
+    }
+
+    // 🔐 hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 🧠 update user fields (only schema fields)
     user.name = name;
-    user.college = college;
-    user.passingYear = passingYear;
-    user.skills = skills;
-    user.isVerified = true;
-    user.otp = null;
+    user.password = hashedPassword;
+    user.location = location;
+    user.experience = experience;
+
+    // 🧹 clear OTP
+    user.otp = undefined;
+    user.otpExpiry = undefined;
 
     await user.save();
-    const  token = generateToken(user);
-      res.json({ message: "Signup completed", token, user} );
+
+    // 🎟️ generate token
+    const token = generateToken(user);
+
+    res.status(200).json({
+      message: "Signup completed successfully ✅",
+      token,
+      user
+    });
 
   } catch (err) {
     res.status(500).json({ message: "Error completing signup" });
   }
 };
 
-
 export const login = async (req, res) => {
   try {
 
     const { email } = req.body;
+    console.log("Login attempt for email:", email);
     const user = await User.findOne({ email });
     if (!user) {
         console.log("User not found");

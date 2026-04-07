@@ -1,15 +1,24 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiHome, FiAlertTriangle, FiSettings, FiUser, FiLogOut, FiMenu, FiX, FiActivity, FiTrendingUp, FiClock } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
+import { 
+  FiHome, FiAlertTriangle, FiSettings, FiUser, FiLogOut, 
+  FiMenu, FiX, FiActivity, FiTrendingUp, FiClock 
+} from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
+// ✅ Demo user data (static - no auth)
+const DEMO_USER = {
+  name: 'Demo User',
+  email: 'demo@errortrackr.com',
+  avatar: 'D'
+};
+
 const Dashboard = () => {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
+  // ✅ Static stats data
   const stats = [
     { icon: FiAlertTriangle, label: 'Total Errors', value: '1,234', change: '+12%', color: 'text-red-500' },
     { icon: FiActivity, label: 'Active Issues', value: '45', change: '-5%', color: 'text-yellow-500' },
@@ -17,6 +26,7 @@ const Dashboard = () => {
     { icon: FiClock, label: 'Avg. Resolution', value: '2.4h', change: '-10%', color: 'text-blue-500' },
   ];
 
+  // ✅ Static recent errors data
   const recentErrors = [
     { id: 1, message: 'TypeError: Cannot read property', project: 'E-Commerce App', time: '2 mins ago', severity: 'Critical' },
     { id: 2, message: 'ReferenceError: x is not defined', project: 'Blog Platform', time: '5 mins ago', severity: 'High' },
@@ -25,8 +35,10 @@ const Dashboard = () => {
     { id: 5, message: 'URIError: Malformed URI', project: 'User Portal', time: '2 hours ago', severity: 'Medium' },
   ];
 
+  // ✅ Simplified logout - just navigates (no backend call)
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     navigate('/');
   };
 
@@ -83,7 +95,7 @@ const Dashboard = () => {
       </motion.aside>
 
       {/* Main Content */}
-      <div className="flex-1 ml-0 md:ml-0">
+      <div className="flex-1">
         {/* Top Bar */}
         <header className="glass px-8 py-4 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-4">
@@ -96,12 +108,12 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center font-bold">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
+                {DEMO_USER.avatar}
               </div>
               {sidebarOpen && (
                 <div>
-                  <p className="font-semibold">{user?.name || 'User'}</p>
-                  <p className="text-sm text-gray-400">{user?.email || 'user@email.com'}</p>
+                  <p className="font-semibold">{DEMO_USER.name}</p>
+                  <p className="text-sm text-gray-400">{DEMO_USER.email}</p>
                 </div>
               )}
             </div>
@@ -134,7 +146,7 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              {/* Recent Errors */}
+              {/* Recent Errors Table */}
               <div className="glass rounded-xl p-6">
                 <h3 className="text-xl font-bold mb-6">Recent Errors</h3>
                 <div className="overflow-x-auto">
@@ -172,7 +184,7 @@ const Dashboard = () => {
             </motion.div>
           )}
 
-          {activeTab === 'profile' && <Profile user={user} />}
+          {activeTab === 'profile' && <Profile user={DEMO_USER} />}
           {activeTab === 'errors' && <ErrorsList />}
           {activeTab === 'settings' && <Settings />}
         </main>
@@ -181,19 +193,20 @@ const Dashboard = () => {
   );
 };
 
-// Profile Component
+// ✅ Profile Component - Frontend Only
 const Profile = ({ user }) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: '',
-    company: '',
-    bio: ''
+    phone: '+91 98765 43210',
+    company: 'Tech Corp',
+    bio: 'Frontend developer passionate about building beautiful UIs.'
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Profile updated successfully!');
+    // ✅ Frontend-only: just show success message
+    alert('✅ Profile updated successfully! (Demo Mode)');
   };
 
   return (
@@ -201,12 +214,12 @@ const Profile = ({ user }) => {
       <div className="glass rounded-xl p-8 mb-6">
         <div className="flex items-center gap-6 mb-8">
           <div className="w-24 h-24 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-4xl font-bold">
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            {user?.avatar || 'U'}
           </div>
           <div>
-            <h2 className="text-3xl font-bold mb-2">{user?.name || 'User'}</h2>
-            <p className="text-gray-400">{user?.email || 'user@email.com'}</p>
-            <p className="text-sm text-primary mt-1">Pro Plan</p>
+            <h2 className="text-3xl font-bold mb-2">{user?.name}</h2>
+            <p className="text-gray-400">{user?.email}</p>
+            <p className="text-sm text-primary mt-1">✨ Pro Plan (Demo)</p>
           </div>
         </div>
 
@@ -226,8 +239,8 @@ const Profile = ({ user }) => {
               <input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full px-4 py-3 bg-darker border border-white/10 rounded-lg focus:border-primary focus:outline-none"
+                disabled
+                className="w-full px-4 py-3 bg-darker/50 border border-white/10 rounded-lg text-gray-500 cursor-not-allowed"
               />
             </div>
             <div>
@@ -237,7 +250,6 @@ const Profile = ({ user }) => {
                 value={formData.phone}
                 onChange={(e) => setFormData({...formData, phone: e.target.value})}
                 className="w-full px-4 py-3 bg-darker border border-white/10 rounded-lg focus:border-primary focus:outline-none"
-                placeholder="+91 1234567890"
               />
             </div>
             <div>
@@ -247,7 +259,6 @@ const Profile = ({ user }) => {
                 value={formData.company}
                 onChange={(e) => setFormData({...formData, company: e.target.value})}
                 className="w-full px-4 py-3 bg-darker border border-white/10 rounded-lg focus:border-primary focus:outline-none"
-                placeholder="Your Company"
               />
             </div>
           </div>
@@ -258,14 +269,13 @@ const Profile = ({ user }) => {
               value={formData.bio}
               onChange={(e) => setFormData({...formData, bio: e.target.value})}
               className="w-full px-4 py-3 bg-darker border border-white/10 rounded-lg focus:border-primary focus:outline-none"
-              placeholder="Tell us about yourself..."
             ></textarea>
           </div>
           <button
             type="submit"
             className="px-8 py-3 bg-gradient-to-r from-primary to-secondary rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/50 transition-all"
           >
-            Update Profile
+            💾 Update Profile (Demo)
           </button>
         </form>
       </div>
@@ -273,25 +283,48 @@ const Profile = ({ user }) => {
   );
 };
 
-// Errors List Component
+// ✅ Errors List - Frontend Placeholder
 const ErrorsList = () => {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="glass rounded-xl p-6">
-        <h3 className="text-xl font-bold mb-6">All Errors</h3>
-        <p className="text-gray-400">Error list will be displayed here...</p>
+        <h3 className="text-xl font-bold mb-6">🔍 All Errors</h3>
+        <div className="space-y-4">
+          {[1,2,3].map((i) => (
+            <div key={i} className="p-4 bg-darker/50 rounded-lg border border-white/5">
+              <p className="font-medium">Sample Error #{i}</p>
+              <p className="text-sm text-gray-400">This is a demo error entry. Connect backend to fetch real data.</p>
+            </div>
+          ))}
+        </div>
       </div>
     </motion.div>
   );
 };
 
-// Settings Component
+// ✅ Settings - Frontend Placeholder
 const Settings = () => {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="glass rounded-xl p-6">
-        <h3 className="text-xl font-bold mb-6">Settings</h3>
-        <p className="text-gray-400">Settings will be displayed here...</p>
+        <h3 className="text-xl font-bold mb-6">⚙️ Settings</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-darker/50 rounded-lg">
+            <span>Dark Mode</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" defaultChecked className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          <div className="flex items-center justify-between p-4 bg-darker/50 rounded-lg">
+            <span>Email Notifications</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" />
+              <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mt-4">💡 Settings are frontend-only in demo mode</p>
       </div>
     </motion.div>
   );

@@ -24,7 +24,6 @@ const Signup = () => {
     experience: ''
   });
 
-  const { signup } = useAuth();
   const navigate = useNavigate();
 
   // 🔹 Send OTP
@@ -84,11 +83,23 @@ const Signup = () => {
 };
 
   // 🔹 Final Submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    signup(formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await axios.post(`${API}/complete-signup`, formData);
+
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user)); // 🔥 FIX
+
+    alert("Account created successfully ✅");
+
     navigate('/dashboard');
-  };
+
+  } catch (err) {
+    alert(err.response?.data?.message || "Signup failed");
+  }
+};
 
   return (
     <section className="pt-32 pb-20 px-4 min-h-screen flex items-center">

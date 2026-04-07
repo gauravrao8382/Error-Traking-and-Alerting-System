@@ -2,24 +2,34 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
-const Login = () => {
+ 
+const Login = ({setUser}) => {
+  const API = "http://localhost:5000";
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Simulate login
-    const userData = {
-      name: formData.email.split('@')[0],
-      email: formData.email,
-    };
-    login(userData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const res = await axios.post(`${API}/login`, {
+      email: formData.email
+    });
+
+    // ✅ save token + user
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+    console.log("Login successful, token and user saved to localStorage");
+    setUser(res.data.user);
     navigate('/dashboard');
-  };
+
+  } catch (err) {
+    alert(err.response?.data?.message || "Login failed");
+  }
+};
 
   return (
     <section className="pt-32 pb-20 px-4 min-h-screen flex items-center">

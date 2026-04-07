@@ -9,6 +9,7 @@ export const sendEmail = async (email, otp) => {
       }
     });
 
+    
     const info = await transporter.sendMail({
       from: `"Collab-Hub" <${process.env.EMAIL_USER}>`, // ✅ FIXED
       to: email,
