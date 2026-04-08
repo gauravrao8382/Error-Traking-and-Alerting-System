@@ -1,5 +1,5 @@
 // ✅ Dashboard.jsx - 100% Frontend, No Backend Needed
-// ✅ Now uses `user` prop as source of truth + Projects Feature in Error Logs
+// ✅ Sidebar Fixed: Left sidebar never scrolls, only right content scrolls
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,7 +11,7 @@ import {
   FiMonitor, FiFolder, FiPlus, FiArrowLeft, FiTrash2
 } from 'react-icons/fi';
 
-// ✅ Demo stats (unchanged)
+// ✅ Demo stats
 const DEMO_STATS = [
   { 
     icon: FiAlertTriangle, 
@@ -87,7 +87,6 @@ const Dashboard = ({ user, setUser }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // ✅ Projects State - Load from localStorage or use demo
   const [projects, setProjects] = useState(() => {
     try {
       const saved = localStorage.getItem('errortrackr_projects');
@@ -97,7 +96,6 @@ const Dashboard = ({ user, setUser }) => {
     }
   });
 
-  // ✅ Save projects to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('errortrackr_projects', JSON.stringify(projects));
@@ -135,7 +133,6 @@ const Dashboard = ({ user, setUser }) => {
     return true;
   };
 
-  // ✅ Project Management Functions
   const handleCreateProject = (newProject) => {
     const project = {
       id: Date.now(),
@@ -154,7 +151,8 @@ const Dashboard = ({ user, setUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex font-sans">
+    // ✅ Main wrapper: h-screen + overflow-hidden for proper scroll containment
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex font-sans h-screen overflow-hidden">
       
       {sidebarOpen && (
         <div 
@@ -163,7 +161,7 @@ const Dashboard = ({ user, setUser }) => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* ✅ Sidebar - FIXED: overflow-hidden so it never scrolls */}
       <motion.aside
         initial={{ x: -280 }}
         animate={{ x: 0 }}
@@ -171,11 +169,11 @@ const Dashboard = ({ user, setUser }) => {
           ${sidebarOpen ? 'w-72' : 'w-20'} 
           bg-slate-900/80 backdrop-blur-xl border-r border-white/10 
           fixed md:relative z-40 h-screen transition-all duration-300
-          flex flex-col
+          flex flex-col overflow-hidden
         `}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-white/10">
+        <div className="p-6 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className={`flex items-center gap-3 ${!sidebarOpen && 'justify-center w-full'}`}>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/25 flex-shrink-0">
@@ -199,8 +197,8 @@ const Dashboard = ({ user, setUser }) => {
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {/* ✅ Navigation - FIXED: overflow-hidden (no scroll) */}
+        <nav className="flex-1 p-4 space-y-1 overflow-hidden">
           {SidebarItems.map((item) => (
             <motion.button
               key={item.id}
@@ -227,9 +225,9 @@ const Dashboard = ({ user, setUser }) => {
           ))}
         </nav>
 
-        {/* Projects Quick List (in Sidebar) */}
+        {/* Projects Quick List */}
         {sidebarOpen && activeTab === 'errors' && (
-          <div className="px-4 pb-4 border-t border-white/10 pt-4">
+          <div className="px-4 pb-4 border-t border-white/10 pt-4 flex-shrink-0">
             <p className="text-xs font-medium text-gray-500 uppercase mb-2">Your Projects</p>
             <div className="space-y-1 max-h-32 overflow-y-auto">
               {projects.slice(0, 4).map((project) => (
@@ -246,8 +244,8 @@ const Dashboard = ({ user, setUser }) => {
           </div>
         )}
 
-        {/* User & Logout */}
-        <div className="p-4 border-t border-white/10 space-y-2">
+        {/* ✅ User & Logout - FIXED: flex-shrink-0 to stay at bottom */}
+        <div className="p-4 border-t border-white/10 space-y-2 flex-shrink-0">
           {sidebarOpen && currentUser?.name && (
             <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/5 min-w-0">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center font-semibold text-white flex-shrink-0">
@@ -274,11 +272,11 @@ const Dashboard = ({ user, setUser }) => {
         </div>
       </motion.aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* ✅ Main Content Area - FIXED: Only this part scrolls */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         
-        {/* Header */}
-        <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-xl border-b border-white/10 px-6 py-4">
+        {/* ✅ Header - flex-shrink-0 so it stays fixed at top */}
+        <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-xl border-b border-white/10 px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 flex-1 max-w-xl">
               <button 
@@ -327,8 +325,8 @@ const Dashboard = ({ user, setUser }) => {
           </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* ✅ Page Content - ONLY THIS SCROLLS */}
+        <main className="flex-1 overflow-y-auto p-6 scroll-smooth">
           <AnimatePresence mode="wait">
             {activeTab === 'overview' && (
               <OverviewContent stats={DEMO_STATS} errors={DEMO_ERRORS} key="overview" />
@@ -354,7 +352,7 @@ const Dashboard = ({ user, setUser }) => {
   );
 };
 
-// ✅ Overview Component (unchanged)
+// ✅ Overview Component
 const OverviewContent = ({ stats, errors }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -500,7 +498,7 @@ const OverviewContent = ({ stats, errors }) => (
   </motion.div>
 );
 
-// ✅ Profile Component (unchanged)
+// ✅ Profile Component
 const ProfileContent = ({ user, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ ...user });
@@ -713,15 +711,13 @@ const ProfileContent = ({ user, onUpdate }) => {
   );
 };
 
-// ✅ ✅ ✅ UPDATED Errors Component - With Projects Feature
-// ✅ ✅ ✅ FIXED ErrorsContent Component - Project Filter + Resolve Feature
+// ✅ Errors Component - With Projects Feature
 const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectColor, setNewProjectColor] = useState('from-violet-500 to-fuchsia-500');
   
-  // ✅ Resolved errors state - Load from localStorage
   const [resolvedErrors, setResolvedErrors] = useState(() => {
     try {
       const saved = localStorage.getItem('errortrackr_resolved');
@@ -731,7 +727,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
     }
   });
 
-  // ✅ Save resolved errors to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('errortrackr_resolved', JSON.stringify(resolvedErrors));
@@ -749,24 +744,20 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
     'from-purple-500 to-indigo-500',
   ];
 
-  // ✅ Filter 1: By selected project (if any)
   const projectFilteredErrors = selectedProject 
     ? errors.filter(e => e.project === selectedProject.name)
     : errors;
 
-  // ✅ Filter 2: Show all (including resolved) but mark them
   const displayErrors = projectFilteredErrors;
 
-  // ✅ Toggle Resolve/Unresolve
   const toggleResolve = (errorId) => {
     setResolvedErrors(prev => 
       prev.includes(errorId) 
-        ? prev.filter(id => id !== errorId)  // Unresolve
-        : [...prev, errorId]                  // Resolve
+        ? prev.filter(id => id !== errorId)
+        : [...prev, errorId]
     );
   };
 
-  // ✅ Check if error is resolved
   const isResolved = (errorId) => resolvedErrors.includes(errorId);
 
   const handleCreateProject = (e) => {
@@ -778,7 +769,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
     }
   };
 
-  // ✅ Count stats for current view
   const totalErrors = displayErrors.length;
   const resolvedCount = displayErrors.filter(e => isResolved(e.id)).length;
   const activeCount = totalErrors - resolvedCount;
@@ -790,7 +780,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
       exit={{ opacity: 0, y: -20 }}
       className="max-w-7xl mx-auto"
     >
-      {/* Create Project Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <motion.div 
@@ -839,7 +828,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
         </div>
       )}
 
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           {selectedProject && (
@@ -869,7 +857,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
         </button>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 text-center">
           <p className="text-2xl font-bold text-white">{totalErrors}</p>
@@ -885,7 +872,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
         </div>
       </div>
 
-      {/* Projects Grid (shown when no project selected) */}
       {!selectedProject && projects.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
@@ -932,7 +918,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
         </div>
       )}
 
-      {/* Empty State */}
       {!selectedProject && projects.length === 0 && (
         <div className="text-center py-12 bg-gradient-to-br from-white/5 to-white/0 rounded-2xl border border-white/10 mb-6">
           <FiFolder className="mx-auto text-gray-600 mb-4" size={40} />
@@ -942,7 +927,6 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
         </div>
       )}
 
-      {/* Errors Table */}
       <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -1046,12 +1030,10 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
         </div>
       </div>
 
-      {/* Project Actions */}
       {selectedProject && (
         <div className="mt-4 flex justify-end gap-3">
           <button 
             onClick={() => {
-              // Resolve all errors for this project
               const projectErrorIds = errors
                 .filter(e => e.project === selectedProject.name)
                 .map(e => e.id);
@@ -1073,7 +1055,7 @@ const ErrorsContent = ({ errors, projects, onCreateProject, onDeleteProject }) =
   );
 };
 
-// ✅ Settings Component (unchanged - security only)
+// ✅ Settings Component
 const SettingsContent = ({ user }) => {
   const [activeSecurityTab, setActiveSecurityTab] = useState('change-password');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -1217,7 +1199,7 @@ const SettingsContent = ({ user }) => {
   );
 };
 
-// ✅ Analytics Placeholder (unchanged)
+// ✅ Analytics Placeholder
 const AnalyticsContent = () => (
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="max-w-4xl mx-auto text-center py-16">
     <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center"><FiTrendingUp className="text-violet-400" size={32} /></div>
