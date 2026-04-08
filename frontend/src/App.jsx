@@ -94,7 +94,7 @@ function App() {
 
           {/* DASHBOARD */}
           <Route path="/dashboard" element={user ? (
-            <Dashboard />
+            <Dashboard setUser={setUser} user={user} />
           ) : <Navigate to="/login" />} />
 
         </Routes>
