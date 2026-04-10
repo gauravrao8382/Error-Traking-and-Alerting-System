@@ -223,25 +223,7 @@ const Dashboard = ({ user, setUser }) => {
             </motion.button>
           ))}
         </nav>
-
-        {/* Projects Quick List */}
-        {sidebarOpen && activeTab === 'errors' && (
-          <div className="px-4 pb-4 border-t border-white/10 pt-4 flex-shrink-0">
-            <p className="text-xs font-medium text-gray-500 uppercase mb-2.5">Projects</p>
-            <div className="space-y-1.5 max-h-32 overflow-y-auto">
-              {projects.slice(0, 4).map((project) => (
-                <button
-                  key={project.id}
-                  onClick={() => setActiveTab('errors')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                >
-                  <div className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${project.color}`} />
-                  <span className="truncate">{project.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+       
 
         {/* User & Logout */}
         <div className="p-4 border-t border-white/10 space-y-2.5 flex-shrink-0">
@@ -654,12 +636,7 @@ const ErrorsContent = ({ user }) => {
   // 📦 Internal State with LocalStorage Persistence (Dummy Data Removed)
   const [projects, setProjects] = useState([]);
 
-  const [errors, setErrors] = useState(() => {
-    try {
-      const saved = localStorage.getItem('errortrackr_errors');
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  const [errors, setErrors] = useState([]);
 
   const [resolvedErrors, setResolvedErrors] = useState(() => {
     try {
@@ -697,7 +674,23 @@ const ErrorsContent = ({ user }) => {
   fetchProjects();
 }, []);
 
-  useEffect(() => { localStorage.setItem('errortrackr_errors', JSON.stringify(errors)); }, [errors]);
+  useEffect(()=>{
+    const fetchErrors = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(`http://localhost:5000/geterrors/${selectedProject._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log("Fetched Errors:", res.data);
+        setErrors(res.data);
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }}
+      fetchErrors();
+},[user._id,projects,selectedProject]);
+
   useEffect(() => { localStorage.setItem('errortrackr_resolved', JSON.stringify(resolvedErrors)); }, [resolvedErrors]);
 
   const colorOptions = [
@@ -759,8 +752,6 @@ const handleDeleteProject = async (projectId) => {
       console.log("Project not found for deletion:", projectId);
       return;
     }
-
-    // 🔥 API CALL
     await axios.delete(`http://localhost:5000/delete/${projectId}`, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -882,9 +873,10 @@ const handleDeleteProject = async (projectId) => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-5 sm:mb-6">
+      {selectedProject && (
+          <div className="grid grid-cols-3 gap-4 mb-5 sm:mb-6">
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4.5 text-center">
-          <p className="text-xl font-bold text-white">{totalErrors}</p>
+          <p className="text-xl font-bold text-white">{errors.length}</p>
           <p className="text-sm text-gray-400 mt-1">Total</p>
         </div>
         <div className="bg-red-500/20 backdrop-blur-sm border border-red-500/20 rounded-2xl p-4.5 text-center">
@@ -896,6 +888,8 @@ const handleDeleteProject = async (projectId) => {
           <p className="text-sm text-gray-400 mt-1">Resolved</p>
         </div>
       </div>
+        )}
+      
 
       {/* Projects Grid */}
       {!selectedProject && projects.length > 0 && (
@@ -915,10 +909,6 @@ const handleDeleteProject = async (projectId) => {
                   <div className="flex items-center gap-3 mb-2.5">
                     <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${project.color}`} />
                     <span className="font-medium text-white text-sm truncate">{project.name}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-red-400">{projectActive} active</span>
-                    <span className="text-gray-500">{projectResolved} resolved</span>
                   </div>
                 </motion.button>
               );
@@ -942,69 +932,114 @@ const handleDeleteProject = async (projectId) => {
       )}
 
       {/* Errors Table */}
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px]">
-            <thead className="bg-white/5">
-              <tr className="text-left">
-                <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Error ID</th>
-                <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Message</th>
-                {!selectedProject && <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase hidden sm:table-cell">Project</th>}
-                <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Severity</th>
-                <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase hidden sm:table-cell">Time</th>
-                <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Status</th>
-                <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {projectFilteredErrors.length > 0 ? projectFilteredErrors.map((error) => {
-                const resolved = isResolved(error.id);
-                return (
-                  <tr key={error.id} className={`transition-colors ${resolved ? 'opacity-60 bg-green-500/5' : 'hover:bg-white/5'}`}>
-                    <td className="px-5 sm:px-6 py-4 text-sm text-gray-400">#{error.id.toString().padStart(4, '0')}</td>
-                    <td className="px-5 sm:px-6 py-4"><p className={`text-sm font-medium ${resolved ? 'text-gray-500 line-through' : 'text-white'} max-w-[160px] sm:max-w-[240px] truncate`}>{error.message}</p></td>
-                    {!selectedProject && (
-                      <td className="px-5 sm:px-6 py-4 hidden sm:table-cell">
-                        <button onClick={() => setSelectedProject(projects.find(p => p.name === error.project))} className="text-sm text-violet-400 hover:text-violet-300 font-medium">{error.project}</button>
-                      </td>
-                    )}
-                    <td className="px-5 sm:px-6 py-4">
-                      <span className={`px-3.5 py-1.5 rounded-full text-xs font-medium ${error.severity === 'Critical' ? 'bg-red-500/20 text-red-400' : error.severity === 'High' ? 'bg-orange-500/20 text-orange-400' : error.severity === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-blue-500/20 text-blue-400'} ${resolved ? 'opacity-50' : ''}`}>
-                        {error.severity}
+      {selectedProject && (
+  <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[700px]">
+        <thead className="bg-white/5">
+          <tr className="text-left">
+            <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Error ID</th>
+            <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Message</th>
+            <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase hidden md:table-cell">Source / Location</th>
+            <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Severity</th>
+            <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase hidden sm:table-cell">Created At</th>
+            <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Status</th>
+            <th className="px-5 sm:px-6 py-4 text-xs font-medium text-gray-400 uppercase">Action</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/5">
+          {errors.length > 0 ? (
+            errors.map((error) => {
+              const resolved = isResolved(error._id); // ✅ MongoDB uses _id
+              return (
+                <tr key={error._id} className={`transition-colors ${resolved ? 'opacity-60 bg-green-500/5' : 'hover:bg-white/5'}`}>
+                  {/* Error ID: Last 6 chars of ObjectId for readability */}
+                  <td className="px-5 sm:px-6 py-4 text-sm text-gray-400 font-mono">
+                    #{error._id.toString().slice(-6).toUpperCase()}
+                  </td>
+
+                  {/* Message */}
+                  <td className="px-5 sm:px-6 py-4">
+                    <p className={`text-sm font-medium ${resolved ? 'text-gray-500 line-through' : 'text-white'} whitespace-normal break-words max-w-md`}>
+                      {error.message}
+                    </p>
+                  </td>
+
+                  {/* Source & Location (from schema) */}
+                  <td className="px-5 sm:px-6 py-4 hidden md:table-cell">
+                    {error.source ? (
+                      <span className="text-sm text-gray-400 font-mono">
+                        {error.source}:{error.lineno}{error.colno ? `:${error.colno}` : ''}
                       </span>
-                    </td>
-                    <td className="px-5 sm:px-6 py-4 text-sm text-gray-400 hidden sm:table-cell">{error.time}</td>
-                    <td className="px-5 sm:px-6 py-4">
-                      {resolved ? (
-                        <span className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 flex items-center gap-1.5"><FiCheck size={14} /> Resolved</span>
-                      ) : (
-                        <span className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400">Active</span>
-                      )}
-                    </td>
-                    <td className="px-5 sm:px-6 py-4">
-                      <button onClick={() => toggleResolve(error.id)} className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${resolved ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300'}`}>
-                        {resolved ? <><FiEdit3 size={14} /> Reopen</> : <><FiCheck size={14} /> Resolve</>}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              }) : (
-                <tr>
-                  <td colSpan={selectedProject ? 7 : 8} className="px-5 sm:px-6 py-10 text-center">
-                    <div className="flex flex-col items-center gap-4">
-                      <FiFolder className="text-gray-600" size={28} />
-                      <p className="text-gray-400 text-sm">{selectedProject ? 'No errors found for this project' : 'No errors in your projects yet'}</p>
-                      {selectedProject && (
-                        <button onClick={() => setSelectedProject(null)} className="text-sm text-violet-400 hover:text-violet-300 font-medium">View all projects</button>
-                      )}
-                    </div>
+                    ) : (
+                      <span className="text-xs text-gray-600">-</span>
+                    )}
+                  </td>
+
+                  {/* Severity */}
+                  <td className="px-5 sm:px-6 py-4">
+                    <span className={`px-3.5 py-1.5 rounded-full text-xs font-medium ${
+                      error.severity === 'Critical' ? 'bg-red-500/20 text-red-400' :
+                      error.severity === 'High' ? 'bg-orange-500/20 text-orange-400' :
+                      error.severity === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-blue-500/20 text-blue-400'
+                    } ${resolved ? 'opacity-50' : ''}`}>
+                      {error.severity}
+                    </span>
+                  </td>
+
+                  {/* Time: uses Mongoose timestamps */}
+                  <td className="px-5 sm:px-6 py-4 text-sm text-gray-400 hidden sm:table-cell">
+                    {new Date(error.createdAt).toLocaleString()}
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-5 sm:px-6 py-4">
+                    {resolved ? (
+                      <span className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 flex items-center gap-1.5 w-fit">
+                        <FiCheck size={14} /> Resolved
+                      </span>
+                    ) : (
+                      <span className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400">Active</span>
+                    )}
+                  </td>
+
+                  {/* Action */}
+                  <td className="px-5 sm:px-6 py-4">
+                    <button 
+                      onClick={() => toggleResolve(error._id)} 
+                      className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                        resolved ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300'
+                      }`}
+                    >
+                      {resolved ? <><FiEdit3 size={14} /> Reopen</> : <><FiCheck size={14} /> Resolve</>}
+                    </button>
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              );
+            })
+          ) : (
+            <tr>
+              {/* colSpan matches header count (7 columns) */}
+              <td colSpan={7} className="px-5 sm:px-6 py-10 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <FiFolder className="text-gray-600" size={28} />
+                  <p className="text-gray-400 text-sm">No errors found for this project</p>
+                  <button 
+                    onClick={() => setSelectedProject(null)} 
+                    className="text-sm text-violet-400 hover:text-violet-300 font-medium"
+                  >
+                    View all projects
+                  </button>
+                </div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
 
       {/* Project Actions */}
       {selectedProject && (

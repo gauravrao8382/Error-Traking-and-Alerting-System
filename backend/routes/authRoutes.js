@@ -1,5 +1,5 @@
 import express from "express";
-import { sendOtp, verifyOtp, completeSignup, login, createProject, getProjects, deleteProject, logError} from "../controllers/authController.js";
+import { sendOtp, verifyOtp, completeSignup, login, createProject, getProjects, deleteProject, logError, getErrors} from "../controllers/authController.js";
 import {authMiddleware} from "../middlewares/authMiddleware.js";
 import { get } from "mongoose";
 const router = express.Router();
@@ -11,5 +11,6 @@ router.post("/login", login);
 router.get("/projects/:userId", authMiddleware, getProjects);
 router.post("/createproject", authMiddleware, createProject);
 router.delete("/delete/:id", authMiddleware, deleteProject);
+router.get("/geterrors/:projectId", authMiddleware, getErrors);
 router.post("/errors", logError);
 export default router;

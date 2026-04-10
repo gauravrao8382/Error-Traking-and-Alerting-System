@@ -205,13 +205,48 @@ export const deleteProject = async (req, res) => {
   }
 };
 
+export const getErrors = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const errors = await Error.find({ projectId });
+    res.json(errors);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching errors" });
+  }
+};
+
 export const logError = async (req, res) => {
   try {
-    const { apiKey,message,source,lineno,colno,stack } = req.body;
+    const { apiKey, message, source, lineno, colno, stack } = req.body;
+
     const project = await Project.findOne({ apiKey });
     if (!project) {
       return res.status(400).json({ message: "Invalid API key" });
     }
+
+    // 🔍 Check if same error already exists
+    const existingError = await Error.findOne({
+      projectId: project._id,
+      message,
+      source,
+      lineno,
+      colno
+    });
+
+    if (existingError) {
+      // 🔁 Update only timestamp + increment count
+      existingError.updatedAt = new Date();
+      existingError.count = (existingError.count || 1) + 1;
+
+      await existingError.save();
+
+      return res.status(200).json({
+        message: "Existing error updated",
+        error: existingError
+      });
+    }
+
+    // 🆕 Create new error
     const error = await Error.create({
       projectId: project._id,
       message,
@@ -219,9 +254,15 @@ export const logError = async (req, res) => {
       source,
       lineno,
       colno,
-      stack
+      stack,
+      count: 1
     });
-    res.status(201).json({ message: "Error logged successfully", error });
+
+    res.status(201).json({
+      message: "New error logged",
+      error
+    });
+
   } catch (err) {
     res.status(500).json({ message: "Error logging error" });
   }
