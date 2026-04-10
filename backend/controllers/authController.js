@@ -1,8 +1,12 @@
 import bcrypt from "bcryptjs";
 
 import User from "../models/user.js";
+import Project from "../models/project.js";
+import Error from "../models/error.js";
+
 import { sendEmail } from "../utils/sendEmail.js";
 import { generateToken } from "../utils/signin.js";
+import { generateApiKey } from "../utils/generateAPI.js";
 
 export const sendOtp = async (req, res) => {
   try {
@@ -144,3 +148,82 @@ export const login = async (req, res) => {
     res.status(500).json({ message: "Login error" });
   }
 };
+
+export const getProjects = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const projects = await Project.find({ userId });
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching projects" });
+  }
+};
+
+export const createProject = async (req, res) => {
+  try {
+    const { name, userId } = req.body;
+
+    const apiKey = generateApiKey(); // 🔥
+
+    const project = await Project.create({
+      name,
+      userId,
+      apiKey
+    });
+
+    const projects = await Project.find({ userId });
+
+    // ✅ Step 3: Send all projects
+    res.status(201).json(projects);
+
+  } catch (err) {
+    res.status(500).json({ message: "Error creating project" });
+  }
+};
+
+export const deleteProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Delete project
+    const project = await Project.findByIdAndDelete(id);
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // // 2️⃣ Delete all related errors
+    // await Error.deleteMany({ projectId: project._id });
+
+    res.status(200).json({
+      message: "Project & related errors deleted successfully"
+    });
+
+  } catch (error) {
+    console.error("Delete Project Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const logError = async (req, res) => {
+  try {
+    const { apiKey,message,source,lineno,colno,stack } = req.body;
+    const project = await Project.findOne({ apiKey });
+    if (!project) {
+      return res.status(400).json({ message: "Invalid API key" });
+    }
+    const error = await Error.create({
+      projectId: project._id,
+      message,
+      severity: "Low",
+      source,
+      lineno,
+      colno,
+      stack
+    });
+    res.status(201).json({ message: "Error logged successfully", error });
+  } catch (err) {
+    res.status(500).json({ message: "Error logging error" });
+  }
+};
+   
