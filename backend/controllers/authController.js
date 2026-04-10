@@ -237,9 +237,11 @@ export const logError = async (req, res) => {
       // 🔁 Update only timestamp + increment count
       existingError.updatedAt = new Date();
       existingError.count = (existingError.count || 1) + 1;
-
+      existingError.status = "Active";
+      project.activeErrors = (project.activeErrors || 0) + 1;
+      project.resolvedErrors = (project.resolvedErrors || 0) - 1;
       await existingError.save();
-
+      await project.save();
       return res.status(200).json({
         message: "Existing error updated",
         error: existingError
@@ -257,7 +259,10 @@ export const logError = async (req, res) => {
       stack,
       count: 1
     });
-
+    // 🚀 Update project error counts
+    project.totalErrors = (project.totalErrors || 0) + 1;
+    project.activeErrors = (project.activeErrors || 0) + 1;
+    await project.save();
     res.status(201).json({
       message: "New error logged",
       error
@@ -267,4 +272,27 @@ export const logError = async (req, res) => {
     res.status(500).json({ message: "Error logging error" });
   }
 };
-   
+
+export const resolveError = async (req, res) => {
+  try {
+    const { id } = req.params;  
+    const error = await Error.findById(id);
+
+    if (!error) {
+      return res.status(404).json({ message: "Error not found" });
+    }
+    error.status = "Resolved";
+    await error.save();
+
+    const project = await Project.findById(error.projectId);
+    if (project) {
+      project.activeErrors = Math.max(0, project.activeErrors - 1);
+      project.resolvedErrors = (project.resolvedErrors || 0) + 1;
+      await project.save();
+    }
+    res.status(200).json({ message: "Error resolved successfully" });
+  } catch (error) {
+    console.error("Resolve Error Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

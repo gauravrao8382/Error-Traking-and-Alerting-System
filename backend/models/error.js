@@ -21,7 +21,12 @@ const errorSchema = new mongoose.Schema({
   source: String,
   lineno: Number,
   colno: Number,
-  stack: String
+  stack: String,
+  status: {
+    type: String,
+    enum: ["Active", "Resolved"],
+    default: "Active"
+  }
 
 }, { timestamps: true });
 

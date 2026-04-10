@@ -683,6 +683,7 @@ const ErrorsContent = ({ user }) => {
             Authorization: `Bearer ${token}`
           }
         });
+        
         console.log("Fetched Errors:", res.data);
         setErrors(res.data);
       } catch (err) {
@@ -703,9 +704,35 @@ const ErrorsContent = ({ user }) => {
     ? errors.filter(e => e.project === selectedProject.name) 
     : errors;
   
-  const toggleResolve = (errorId) => 
-    setResolvedErrors(prev => prev.includes(errorId) ? prev.filter(id => id !== errorId) : [...prev, errorId]);
-  
+  const toggleResolve = async (errorId) => {
+  try {
+    const error = errors.find(e => e._id === errorId);
+    if (!error) return;
+
+    const newStatus = error.status === "Resolved" ? "Active" : "Resolved";
+    
+    const token = localStorage.getItem("token");
+
+    // ✅ Pehle API call
+    await axios.patch(
+      `http://localhost:5000/resolve-error/${errorId}`,
+      { status: newStatus },
+      { headers: { Authorization: `Bearer ${token}` }}
+    );
+
+    // ✅ Sirf success ke baad state update
+    setErrors(prevErrors => 
+      prevErrors.map(err => 
+        err._id === errorId ? { ...err, status: newStatus } : err
+      )
+    );
+
+  } catch (error) {
+    console.error("Toggle resolve error:", error);
+    alert("❌ Failed to update status");
+  }
+};
+
   const isResolved = (errorId) => resolvedErrors.includes(errorId);
 
   // ✅ Create Project
@@ -823,7 +850,7 @@ const handleDeleteProject = async (projectId) => {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-white">{selectedProject ? `${selectedProject.name} - Errors` : 'Error Logs'}</h1>
             
-            <p className="text-gray-400 mt-2 text-sm">{selectedProject ? `${activeCount} active • ${resolvedCount} resolved` : `${projects.length} projects • ${errors.length} total errors`}</p>
+            <p className="text-gray-400 mt-2 text-sm">{selectedProject ? `${selectedProject.activeErrors} active • ${selectedProject.resolvedErrors} resolved` : `${projects.length} projects • ${errors.length} total errors`}</p>
           </div>
         </div>
         {!selectedProject && (
@@ -873,22 +900,38 @@ const handleDeleteProject = async (projectId) => {
       </div>
 
       {/* Stats */}
-      {selectedProject && (
-          <div className="grid grid-cols-3 gap-4 mb-5 sm:mb-6">
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4.5 text-center">
-          <p className="text-xl font-bold text-white">{errors.length}</p>
-          <p className="text-sm text-gray-400 mt-1">Total</p>
-        </div>
-        <div className="bg-red-500/20 backdrop-blur-sm border border-red-500/20 rounded-2xl p-4.5 text-center">
-          <p className="text-xl font-bold text-red-400">{activeCount}</p>
-          <p className="text-sm text-gray-400 mt-1">Active</p>
-        </div>
-        <div className="bg-green-500/20 backdrop-blur-sm border border-green-500/20 rounded-2xl p-4.5 text-center">
-          <p className="text-xl font-bold text-green-400">{resolvedCount}</p>
-          <p className="text-sm text-gray-400 mt-1">Resolved</p>
-        </div>
-      </div>
-        )}
+      {/* Stats - Dynamic Counts (selectedProject ke andar replace karein) */}
+{selectedProject && (
+  <div className="grid grid-cols-3 gap-4 mb-5 sm:mb-6">
+    {/* Total Errors - Dynamic */}
+    <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4.5 text-center">
+      <p className="text-xl font-bold text-white">
+        {errors.filter(e => e.projectId === selectedProject._id).length}
+      </p>
+      <p className="text-sm text-gray-400 mt-1">Total</p>
+    </div>
+    
+    {/* Active Errors - Dynamic Calculation */}
+    <div className="bg-red-500/20 backdrop-blur-sm border border-red-500/20 rounded-2xl p-4.5 text-center">
+      <p className="text-xl font-bold text-red-400">
+        {errors.filter(e => 
+          e.projectId === selectedProject._id && e.status !== "Resolved"
+        ).length}
+      </p>
+      <p className="text-sm text-gray-400 mt-1">Active</p>
+    </div>
+    
+    {/* Resolved Errors - Dynamic Calculation */}
+    <div className="bg-green-500/20 backdrop-blur-sm border border-green-500/20 rounded-2xl p-4.5 text-center">
+      <p className="text-xl font-bold text-green-400">
+        {errors.filter(e => 
+          e.projectId === selectedProject._id && e.status === "Resolved"
+        ).length}
+      </p>
+      <p className="text-sm text-gray-400 mt-1">Resolved</p>
+    </div>
+  </div>
+)}
       
 
       {/* Projects Grid */}
@@ -909,6 +952,7 @@ const handleDeleteProject = async (projectId) => {
                   <div className="flex items-center gap-3 mb-2.5">
                     <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${project.color}`} />
                     <span className="font-medium text-white text-sm truncate">{project.name}</span>
+                    
                   </div>
                 </motion.button>
               );
@@ -995,7 +1039,7 @@ const handleDeleteProject = async (projectId) => {
 
                   {/* Status */}
                   <td className="px-5 sm:px-6 py-4">
-                    {resolved ? (
+                    {error.status==="Resolved" ? (
                       <span className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 flex items-center gap-1.5 w-fit">
                         <FiCheck size={14} /> Resolved
                       </span>
@@ -1005,15 +1049,23 @@ const handleDeleteProject = async (projectId) => {
                   </td>
 
                   {/* Action */}
+                  {/* Action */}
                   <td className="px-5 sm:px-6 py-4">
-                    <button 
-                      onClick={() => toggleResolve(error._id)} 
-                      className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                        resolved ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300'
-                      }`}
-                    >
-                      {resolved ? <><FiEdit3 size={14} /> Reopen</> : <><FiCheck size={14} /> Resolve</>}
-                    </button>
+                    {error.status==="Resolved" ? (
+                      // ✅ Already resolved - button disabled ya static text
+                      <span className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 flex items-center gap-1.5 w-fit cursor-not-allowed opacity-70">
+                        <FiCheck size={14} /> Resolved
+                      </span>
+                    ) : (
+                      // ✅ Active error - Resolve button clickable
+                      <button 
+                        onClick={() => toggleResolve(error._id)} 
+                        className="text-sm font-medium transition-colors flex items-center gap-1.5 text-green-400 hover:text-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={error.status==="Resolved"} // ✅ Extra safety: disabled attribute
+                      >
+                        <FiCheck size={14} /> Resolve
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

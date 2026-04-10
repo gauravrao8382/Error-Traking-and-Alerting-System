@@ -23,7 +23,20 @@ const projectSchema = new mongoose.Schema(
     },
     color:{
       type: String
+    },
+    totalErrors: {
+      type: Number,
+      default: 0
+    },
+    activeErrors: {
+      type: Number,
+      default: 0
+    },
+    resolvedErrors: {
+      type: Number,
+      default: 0
     }
+
   },
   {
     timestamps: true // createdAt, updatedAt auto
