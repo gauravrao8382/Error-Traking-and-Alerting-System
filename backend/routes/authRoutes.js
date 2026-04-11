@@ -1,5 +1,5 @@
 import express from "express";
-import { sendOtp, verifyOtp, completeSignup, login, updateProfile, createProject, getProjects, deleteProject, logError, getUserErrors, getErrors, resolveError} from "../controllers/authController.js";
+import { sendOtp, verifyOtp, completeSignup, login, updateProfile, createProject, getProjects, deleteProject, logError, getUserErrors, getErrors, resolveError, changePassword, resetPassword} from "../controllers/authController.js";
 import {authMiddleware} from "../middlewares/authMiddleware.js";
 import { get } from "mongoose";
 const router = express.Router();
@@ -16,4 +16,6 @@ router.get("/getUserErrors/:userId", authMiddleware, getUserErrors);
 router.get("/geterrors/:projectId", authMiddleware, getErrors);
 router.post("/errors", logError);
 router.patch("/resolve-error/:id", authMiddleware, resolveError)
+router.patch("/change-password/:userId", authMiddleware, changePassword);
+router.patch("/reset-password", resetPassword);
 export default router;

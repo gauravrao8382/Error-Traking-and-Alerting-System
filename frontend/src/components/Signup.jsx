@@ -113,7 +113,10 @@ const Signup = ({ setUser }) => {
       errorToast("Please enter your address");
       return;
     }
-
+    if(formData.password.length < 6){
+      errorToast("Password must be at least 6 characters");
+      return;
+    }
     try {
       const res = await axios.post(`${API}/complete-signup`, formData);
       successToast("🎉 Account created successfully!");

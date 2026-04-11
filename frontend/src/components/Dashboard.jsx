@@ -5,7 +5,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiHome, FiAlertTriangle, FiSettings, FiUser, FiLogOut, 
-  FiMenu, FiX, FiActivity, FiTrendingUp, FiClock,
+  FiMenu, FiX,FiEye, FiEyeOff, FiActivity, FiTrendingUp, FiClock,
   FiBell, FiSearch, FiChevronRight, FiEdit3, FiSave,
   FiMail, FiPhone, FiBriefcase, FiMapPin, FiCheck,
   FiMonitor, FiFolder, FiPlus, FiArrowLeft, FiTrash2, FiCopy, FiKey,FiBook
@@ -1056,20 +1056,111 @@ const SettingsContent = ({ user }) => {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
-  const handleChangePassword = (e) => {
-    e.preventDefault(); setPasswordError(''); setPasswordSuccess('');
-    if (newPass.length < 8) { setPasswordError('Min 8 characters'); return; }
-    if (newPass !== confirmPass) { setPasswordError('Passwords do not match'); return; }
-    setPasswordSuccess('✅ Updated!'); setCurrentPassword(''); setNewPass(''); setConfirmPass('');
-    setTimeout(() => setPasswordSuccess(''), 3000);
-  };
+  // 👁️ Password visibility states
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showForgotNew, setShowForgotNew] = useState(false);
+  const [showForgotConfirm, setShowForgotConfirm] = useState(false);
 
-  const handleForgotPasswordSubmit = (e) => {
-    e.preventDefault();
-    if (forgotStep === 1) setForgotStep(2);
-    else if (forgotStep === 2) { if (otp === '123456') setForgotStep(3); else alert('❌ Invalid OTP'); }
-    else if (forgotStep === 3) { if (newPassword === confirmPassword && newPassword.length >= 8) { alert('✅ Reset!'); setShowForgotPassword(false); setForgotStep(1); setOtp(''); setNewPassword(''); setConfirmPassword(''); } else alert('❌ Invalid'); }
-  };
+  const handleCancelForgot = () => {
+    setShowForgotPassword(false);
+    setForgotStep(1);
+    setForgotEmail(user?.email || '');
+    setOtp('');
+    setNewPassword('');
+    setConfirmPassword('');
+  }
+
+  const handleChangePassword = async (e) => {
+      e.preventDefault();
+      setPasswordError('');
+      setPasswordSuccess('');
+      if (newPass.length < 6) {
+        errorToast('Password must be at least 6 characters');
+        return;
+      }
+      if (newPass !== confirmPass) {
+        errorToast('Passwords do not match');
+        return;
+      }
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await axios.patch(
+          `http://localhost:5000/change-password/${user._id}`,
+          {
+            currentPassword,
+            newPassword: newPass,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setCurrentPassword('');
+        setNewPass('');
+        setConfirmPass('');
+        successToast(res.data.message || 'Password changed successfully');
+        setTimeout(() => setPasswordSuccess(''), 3000);
+
+      } catch (err) {
+        errorToast(err.response?.data?.message || 'Failed to change password');
+      }
+    };
+
+  const handleForgotPasswordSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    if (forgotStep === 1) {
+      
+      await axios.post("http://localhost:5000/send-otp", {
+        email: forgotEmail,
+      });
+
+      successToast("OTP sent to email");
+      setForgotStep(2);
+    }
+
+    else if (forgotStep === 2) {
+        try {
+          await axios.post("http://localhost:5000/verify-otp", {
+            email: forgotEmail,
+            otp,
+          });
+          successToast("OTP verified");
+          setForgotStep(3);
+        } catch (err) {
+          errorToast(err.response?.data?.message || "Invalid OTP");
+          setOtp('');
+        }
+    }
+
+    else if (forgotStep === 3) {
+      if (newPassword !== confirmPassword) {
+        return errorToast("Passwords do not match");
+      }
+      if (newPassword.length < 6) {
+        return errorToast("Min 6 characters required");
+      }
+      await axios.patch("http://localhost:5000/reset-password", {
+        email: forgotEmail,
+        newPassword,
+      });
+      successToast("Password reset successful");
+      setShowForgotPassword(false);
+      setForgotStep(1);
+      setOtp('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+
+  } catch (err) {
+    errorToast(err.response?.data?.message || "Something went wrong");
+  }
+};
 
   return (
     <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -25 }} className="max-w-2xl mx-auto">
@@ -1078,7 +1169,8 @@ const SettingsContent = ({ user }) => {
           <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-slate-900 border border-white/10 rounded-2xl p-5 w-full max-w-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-white">{forgotStep === 1 ? 'Reset Password' : forgotStep === 2 ? 'Enter OTP' : 'New Password'}</h3>
-              <button onClick={() => setShowForgotPassword(false)} className="text-gray-400 hover:text-white"><FiX size={18} /></button>
+              <button onClick={handleCancelForgot} className="text-gray-400 hover:text-white"><FiX size={18} />
+              </button>
             </div>
             <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
               {forgotStep === 1 && (<>
@@ -1093,8 +1185,16 @@ const SettingsContent = ({ user }) => {
                 <button type="submit" className="w-full py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-xl font-medium text-white text-sm">Verify</button>
               </>)}
               {forgotStep === 3 && (<>
-                <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" required />
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" required />
+                {/* Forgot Password - New Password */}
+                <div className="space-y-1.5 relative">
+                  <input type={showForgotNew ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm pr-10" required />
+                  <button type="button" onClick={() => setShowForgotNew(!showForgotNew)} className="absolute right-3 top-[34px] text-gray-400 hover:text-white">{showForgotNew ? <FiEyeOff size={16}/> : <FiEye size={16}/>}</button>
+                </div>
+                {/* Forgot Password - Confirm Password */}
+                <div className="space-y-1.5 relative">
+                  <input type={showForgotConfirm ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm" className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm pr-10" required />
+                  <button type="button" onClick={() => setShowForgotConfirm(!showForgotConfirm)} className="absolute right-3 top-[34px] text-gray-400 hover:text-white">{showForgotConfirm ? <FiEyeOff size={16}/> : <FiEye size={16}/>}</button>
+                </div>
                 <button type="submit" className="w-full py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl font-medium text-white text-sm">Reset</button>
               </>)}
             </form>
@@ -1121,17 +1221,23 @@ const SettingsContent = ({ user }) => {
         
         {activeSecurityTab === 'change-password' && (
           <form onSubmit={handleChangePassword} className="space-y-4">
-            <div className="space-y-1.5">
+            {/* Current Password */}
+            <div className="space-y-1.5 relative">
               <label className="text-xs font-medium text-gray-300">Current Password</label>
-              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" placeholder="••••••••" required />
+              <input type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm pr-10" placeholder="••••••••" required />
+              <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-[34px] text-gray-400 hover:text-white">{showCurrent ? <FiEyeOff size={16}/> : <FiEye size={16}/>}</button>
             </div>
-            <div className="space-y-1.5">
+            {/* New Password */}
+            <div className="space-y-1.5 relative">
               <label className="text-xs font-medium text-gray-300">New Password</label>
-              <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" placeholder="Min 8 chars" required />
+              <input type={showNew ? 'text' : 'password'} value={newPass} onChange={(e) => setNewPass(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm pr-10" placeholder="Min 8 chars" required />
+              <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-[34px] text-gray-400 hover:text-white">{showNew ? <FiEyeOff size={16}/> : <FiEye size={16}/>}</button>
             </div>
-            <div className="space-y-1.5">
+            {/* Confirm Password */}
+            <div className="space-y-1.5 relative">
               <label className="text-xs font-medium text-gray-300">Confirm</label>
-              <input type="password" value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm" placeholder="••••••••" required />
+              <input type={showConfirm ? 'text' : 'password'} value={confirmPass} onChange={(e) => setConfirmPass(e.target.value)} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-sm pr-10" placeholder="••••••••" required />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-[34px] text-gray-400 hover:text-white">{showConfirm ? <FiEyeOff size={16}/> : <FiEye size={16}/>}</button>
             </div>
             {passwordError && <p className="text-xs text-red-400">{passwordError}</p>}
             {passwordSuccess && <p className="text-xs text-green-400">{passwordSuccess}</p>}
