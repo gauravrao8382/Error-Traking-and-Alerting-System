@@ -1,45 +1,71 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    trim: true
+const userSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    otp: {
+      type: String,
+    },
+    otpExpiry: {
+      type: Date,
+    },
+
+    name: {
+      type: String,
+      trim: true,
+    },
+
+    password: {
+      type: String,
+      minlength: 6,
+    },
+
+    userType: {
+      type: String,
+      enum: ["student", "employee"],
+      default: "student",
+    },
+
+    college: {
+      type: String,
+      trim: true,
+    },
+
+    course: {
+      type: String,
+      trim: true,
+    },
+
+    company: {
+      type: String,
+      trim: true,
+    },
+
+    experience: {
+      type: Number, // years
+    },
+
+    address: {
+      type: String,
+      trim: true,
+    },
+
+    // 🔐 Extra useful fields
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
-
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true
-  },
-
-  password: {
-    type: String,
-    minlength: 6
-  },
-
-  location: {
-    type: String
-  },
-
-  experience: {
-    type: Number,
-    min: 0
-  },
-
-  otp: String,
-  otpExpiry: Date,
-
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
-
-  projects: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Project"
-  }]
-
-}, { timestamps: true });
+  {
+    timestamps: true, // ✅ createdAt, updatedAt auto milenge
+  }
+);
 
 export default mongoose.model("User", userSchema);

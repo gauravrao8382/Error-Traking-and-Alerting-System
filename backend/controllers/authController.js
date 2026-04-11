@@ -70,70 +70,81 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-
 export const completeSignup = async (req, res) => {
   try {
-    const { email, name, password, location, experience } = req.body;
+    const {
+      email,
+      name,
+      password,
+      userType,
+      college,
+      course,
+      company,
+      experience,
+      address,
+    } = req.body;
 
-    // 🔍 check user exists
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 🔒 check OTP verified
     if (!user.isVerified) {
       return res.status(400).json({ message: "Please verify OTP first" });
     }
 
-    // 🚫 prevent re-signup
     if (user.name) {
       return res.status(400).json({ message: "Signup already completed" });
     }
 
-    // 🔐 hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🧠 update user fields (only schema fields)
     user.name = name;
     user.password = hashedPassword;
-    user.location = location;
+    user.userType = userType;
+    user.college = college;
+    user.course = course;
+    user.company = company;
     user.experience = experience;
-
-    // 🧹 clear OTP
+    user.address = address;
     user.otp = undefined;
     user.otpExpiry = undefined;
 
     await user.save();
 
-    // 🎟️ generate token
     const token = generateToken(user);
 
     res.status(200).json({
       message: "Signup completed successfully ✅",
       token,
-      user
+      user,
     });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Error completing signup" });
   }
 };
 
 export const login = async (req, res) => {
   try {
+    const { email, password } = req.body;
 
-    const { email } = req.body;
     console.log("Login attempt for email:", email);
+
     const user = await User.findOne({ email });
+
     if (!user) {
-        console.log("User not found");
       return res.status(400).json({ message: "User not found" });
     }
-
     if (!user.isVerified) {
       return res.status(400).json({ message: "Please verify your email first" });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const token = generateToken(user);
@@ -145,7 +156,62 @@ export const login = async (req, res) => {
     });
 
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ message: "Login error" });
+  }
+};
+
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const {
+      name,
+      userType,
+      college,
+      course,
+      company,
+      experience,
+      address,
+    } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ✅ Update fields
+    user.name = name || user.name;
+    user.userType = userType || user.userType;
+
+    if (userType === "student") {
+      user.college = college;
+      user.course = course;
+      user.company = undefined;
+      user.experience = undefined;
+    }
+
+    if (userType === "employee") {
+      user.company = company;
+      user.experience = experience;
+      user.college = undefined;
+      user.course = undefined;
+    }
+
+    user.address = address || user.address;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully ✅",
+      user,
+    });
+
+  } catch (err) {
+    console.error("Update Profile Error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -205,6 +271,20 @@ export const deleteProject = async (req, res) => {
   }
 };
 
+export const getUserErrors = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const userErrors = await Error.find({ userId });
+
+    res.json(userErrors);
+
+  } catch (err) {
+    console.error("Error fetching errors:", err);
+    res.status(500).json({ message: "Error fetching errors" });
+  }
+};
+
 export const getErrors = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -235,11 +315,10 @@ export const logError = async (req, res) => {
 
     if (existingError) {
       // 🔁 Update only timestamp + increment count
-      existingError.updatedAt = new Date();
       existingError.count = (existingError.count || 1) + 1;
       existingError.status = "Active";
       project.activeErrors = (project.activeErrors || 0) + 1;
-      project.resolvedErrors = (project.resolvedErrors || 0) - 1;
+      project.resolvedErrors = Math.max(0, project.resolvedErrors || 0 - 1);
       await existingError.save();
       await project.save();
       return res.status(200).json({
@@ -248,8 +327,10 @@ export const logError = async (req, res) => {
       });
     }
 
+    const userId= project.userId;
     // 🆕 Create new error
     const error = await Error.create({
+      userId,
       projectId: project._id,
       message,
       severity: "Low",

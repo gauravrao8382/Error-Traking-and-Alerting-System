@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from "react-hot-toast";
 
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -57,6 +58,8 @@ function App() {
   }
 
   return (
+    <>
+    <Toaster position="top-right" reverseOrder={false} />
     <Router>
       <div className="min-h-screen text-gray-800">
         <Routes>
@@ -87,7 +90,7 @@ function App() {
           <Route path="/signup" element={!user ? (
             <>
               <Navbar />
-              <Signup />
+              <Signup setUser={setUser} />
               <Footer />
             </>
           ) : <Navigate to="/dashboard" />} />
@@ -100,6 +103,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </>
   );
 }
 
