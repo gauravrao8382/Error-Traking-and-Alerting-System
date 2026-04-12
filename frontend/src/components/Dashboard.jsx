@@ -8,13 +8,14 @@ import {
   FiMenu, FiX,FiEye, FiEyeOff, FiActivity, FiTrendingUp, FiClock,
   FiBell, FiSearch, FiChevronRight, FiEdit3, FiSave,
   FiMail, FiPhone, FiBriefcase, FiMapPin, FiCheck,
-  FiMonitor, FiFolder, FiPlus, FiArrowLeft, FiTrash2, FiCopy, FiKey,FiBook
+  FiMonitor, FiFolder, FiPlus, FiArrowLeft, FiTrash2, FiCopy, FiKey,FiBook,FiServer, FiMessageCircle, FiZap, FiVideo,FiGithub
 } from 'react-icons/fi';
 import { successToast, errorToast } from "../utils/Toast";
 
 
 const SidebarItems = [
   { id: 'overview', icon: FiHome, label: 'Dashboard' },
+  { id: 'manual', icon: FiBook, label: 'User Manual' },
   { id: 'errors', icon: FiAlertTriangle, label: 'Error Logs' },
   { id: 'analytics', icon: FiTrendingUp, label: 'Analytics' },
   { id: 'profile', icon: FiUser, label: 'My Profile' },
@@ -258,6 +259,7 @@ const Dashboard = ({ user, setUser }) => {
             )}
             {activeTab === 'settings' && <SettingsContent user={currentUser} key="settings" />}
             {activeTab === 'analytics' && <AnalyticsContent key="analytics" />}
+            {activeTab === 'manual' && <UserManualContent key="manual" />}
           </AnimatePresence>
         </main>
       </div>
@@ -1256,5 +1258,448 @@ const AnalyticsContent = () => (
     <p className="text-gray-400 text-sm">Detailed trends coming soon.</p>
   </motion.div>
 );
+
+// ✅ User Manual Component - Step-by-Step Integration Guide
+const UserManualContent = () => {
+  const [activeDocTab, setActiveDocTab] = useState('javascript');
+  const [copiedCode, setCopiedCode] = useState(null);
+  const [expandedStep, setExpandedStep] = useState(null);
+
+  // ✅ Copy to Clipboard Handler
+  const handleCopyCode = async (code, id) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(id);
+      successToast("Code copied! 📋");
+      setTimeout(() => setCopiedCode(null), 2000);
+    } catch (err) {
+      errorToast("Copy failed");
+      console.error("Copy error:", err);
+    }
+  };
+
+  const toggleStep = (stepId) => {
+    setExpandedStep(expandedStep === stepId ? null : stepId);
+  };
+
+  // 🔹 JAVASCRIPT INTEGRATION CODES
+  const jsSteps = [
+    {
+      id: 'js-step1',
+      title: 'Step 1: API Key Setup',
+      description: 'Apne project ki main JS file mein ye code add karein',
+      code: `const API_KEY = " "; // 🔑 Apna API key yahan daalo`,
+      language: 'javascript'
+    },
+    {
+      id: 'js-step2',
+      title: 'Step 2: Global Error Handler',
+      description: 'Ye code add karein taaki sabhi errors capture ho sakein',
+      code: `window.onerror = function (message, source, lineno, colno, error) {
+  console.log("🔥 Error captured:", message);
+  
+  fetch("http://localhost:5000/errors", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      apiKey: API_KEY,
+      message,
+      source,
+      lineno,
+      colno,
+      stack: error?.stack
+    })
+  });
+};`,
+      language: 'javascript'
+    }
+  ];
+
+  // 🔹 REACT INTEGRATION CODES
+  const reactSteps = [
+    {
+      id: 'react-step1',
+      title: 'Step 1: ErrorBoundary File Create Karein',
+      description: 'Project mein `ErrorBoundary.js` naam ki new file banayein aur ye code paste karein',
+      code: `import React from "react";
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, info) {
+    let lineno = null;
+    let colno = null;
+    let source = null;
+
+    // 🔍 Stack parsing
+    if (error.stack) {
+      const match = error.stack.match(/at\\s+(.*):(\\d+):(\\d+)/);
+      if (match) {
+        source = match[1];
+        lineno = match[2];
+        colno = match[3];
+      }
+    }
+
+    // 🔥 Send to backend
+    fetch("http://localhost:5000/errors", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        apiKey: " ",
+        message: error.message,
+        stack: error.stack,
+        componentStack: info.componentStack,
+        source,
+        lineno,
+        colno
+      })
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <h2>Something went wrong 😢</h2>;
+    }
+    return this.props.children;
+  }
+}
+
+export default ErrorBoundary;`,
+      language: 'jsx'
+    },
+    {
+      id: 'react-step2',
+      title: 'Step 2: App Component ko Wrap Karein',
+      description: '`main.jsx` ya `index.jsx` mein App ko ErrorBoundary se wrap karein',
+      code: `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import ErrorBoundary from './ErrorBoundary'; // ✅ Import karein
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <ErrorBoundary> {/* ✅ App ko wrap karein */}
+      <App />
+    </ErrorBoundary>
+  </StrictMode>
+);`,
+      language: 'jsx'
+    },
+    {
+      id: 'react-step3',
+      title: 'Step 3: Global Error Handlers (main.jsx top par)',
+      description: '`main.jsx` ki sabse upar ye code add karein for global JS & Promise errors',
+      code: `const API_KEY = " ";
+
+// 🔥 Global JS Errors
+window.onerror = function (message, source, lineno, colno, error) {
+  fetch("http://localhost:5000/errors", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      apiKey: API_KEY,
+      message,
+      source,
+      lineno,
+      colno,
+      stack: error?.stack,
+      type: "JS_ERROR"
+    })
+  });
+};
+
+// 🔥 Unhandled Promise Rejections
+window.addEventListener("unhandledrejection", function (event) {
+  console.log("🔥 Promise Error:", event.reason);
+
+  let lineno = null;
+  let colno = null;
+  let source = null;
+
+  if (event.reason?.stack) {
+    const lines = event.reason.stack.split("\\n");
+    for (let line of lines) {
+      let match = line.match(/at\\s+(.*):(\\d+):(\\d+)/);
+      if (!match) {
+        match = line.match(/(.*):(\\d+):(\\d+)/);
+      }
+      if (match) {
+        source = match[1];
+        lineno = match[2];
+        colno = match[3];
+        break;
+      }
+    }
+  }
+
+  fetch("http://localhost:5000/errors", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      apiKey: API_KEY,
+      message: event.reason?.message || "Promise Error",
+      stack: event.reason?.stack,
+      source,
+      lineno,
+      colno,
+      type: "PROMISE_ERROR"
+    })
+  });
+});`,
+      language: 'javascript'
+    }
+  ];
+
+  // 🔹 BACKEND Placeholder
+  const backendContent = {
+    title: '🔙 Backend Integration',
+    description: 'Node.js/Express backend setup guide',
+    status: 'coming-soon',
+    message: 'Backend integration guide jald hi available hoga! 🚀\n\nIsme shaamil honge:\n• Express error middleware\n• Custom error handler setup\n• Database logging configuration\n• Alert & notification system\n\n✅ Abhi ke liye, frontend se bheje gaye errors automatically aapke endpoint `http://localhost:5000/errors` par receive honge.'
+  };
+
+  // ✅ Reusable Code Block Component
+  const CodeBlock = ({ code, language, id, onCopy }) => (
+    <div className="relative group">
+      <div className="absolute top-3 right-3 z-10 flex gap-2">
+        <span className="px-2 py-1 bg-violet-500/20 text-violet-400 rounded text-[10px] uppercase tracking-wider font-medium">
+          {language}
+        </span>
+        <button
+          onClick={() => onCopy(code, id)}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 
+                     border border-white/10 rounded-lg text-xs font-medium text-gray-300 
+                     hover:text-white transition-all backdrop-blur-sm"
+          title="Copy code"
+        >
+          {copiedCode === id ? (
+            <>
+              <FiCheck size={14} className="text-green-400" />
+              <span className="text-green-400">Copied!</span>
+            </>
+          ) : (
+            <>
+              <FiCopy size={14} />
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+      <pre className="bg-slate-950/80 border border-white/10 rounded-xl p-4 pt-12 overflow-x-auto 
+                      text-xs sm:text-sm font-mono text-gray-300 leading-relaxed custom-scrollbar">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+
+  // ✅ Step Card Component
+  const StepCard = ({ step, index, isExpanded, onToggle, onCopy }) => (
+    <div className="border border-white/10 rounded-xl overflow-hidden bg-white/5">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors text-left"
+      >
+        <div className="flex items-center gap-3">
+          <span className="w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
+            {index + 1}
+          </span>
+          <div>
+            <h4 className="font-medium text-white text-sm">{step.title}</h4>
+            <p className="text-gray-400 text-xs mt-0.5">{step.description}</p>
+          </div>
+        </div>
+        <FiChevronRight 
+          className={`text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} 
+          size={18} 
+        />
+      </button>
+      
+      {isExpanded && (
+        <div className="px-4 pb-4 border-t border-white/10 pt-4">
+          <CodeBlock code={step.code} language={step.language} id={step.id} onCopy={onCopy} />
+        </div>
+      )}
+    </div>
+  );
+
+  const tabs = [
+    { id: 'javascript', label: 'JavaScript', icon: FiKey },
+    { id: 'react', label: 'React', icon: FiMonitor },
+    { id: 'backend', label: 'Backend', icon: FiServer },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 25 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -25 }}
+      className="max-w-4xl mx-auto"
+    >
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-white">📚 Integration Guide</h1>
+        <p className="text-gray-400 mt-1 text-sm">ErrorTrackr ko apne project mein add karein</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => { setActiveDocTab(tab.id); setExpandedStep(null); }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all
+              ${activeDocTab === tab.id 
+                ? 'bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 text-white border border-violet-500/30 shadow-lg shadow-violet-500/10' 
+                : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
+          >
+            <tab.icon size={16} />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ✅ JAVASCRIPT TAB */}
+      {activeDocTab === 'javascript' && (
+        <div className="space-y-4">
+          <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 mb-4">
+            <h3 className="text-sm font-medium text-violet-400 mb-1">🎯 Quick Start</h3>
+            <p className="text-xs text-gray-300">
+              Vanilla JavaScript ya kisi bhi frontend project mein error tracking enable karne ke liye neeche diye gaye steps follow karein.
+            </p>
+          </div>
+
+          {jsSteps.map((step, index) => (
+            <StepCard
+              key={step.id}
+              step={step}
+              index={index}
+              isExpanded={expandedStep === step.id}
+              onToggle={() => toggleStep(step.id)}
+              onCopy={handleCopyCode}
+            />
+          ))}
+
+          <div className="mt-6 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+            <h4 className="text-sm font-medium text-amber-400 mb-2 flex items-center gap-2">
+              <FiAlertTriangle size={14} /> Important Notes
+            </h4>
+            <ul className="text-xs text-gray-300 space-y-1.5 list-disc list-inside">
+              <li><strong>API Key</strong>: Dashboard se apna actual API key copy karke replace karein</li>
+              <li><strong>Endpoint URL</strong>: Production mein <code className="bg-white/10 px-1 rounded">localhost</code> ko apne server URL se badlein</li>
+              <li><strong>File Location</strong>: Ye code aapki main entry file (<code className="bg-white/10 px-1 rounded">index.js</code>, <code className="bg-white/10 px-1 rounded">app.js</code>) mein sabse upar add karein</li>
+              <li><strong>Testing</strong>: Integration test karne ke liye <code className="bg-white/10 px-1 rounded">throw new Error('test')</code> use karein</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ REACT TAB */}
+      {activeDocTab === 'react' && (
+        <div className="space-y-4">
+          <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4 mb-4">
+            <h3 className="text-sm font-medium text-violet-400 mb-1">⚛️ React Setup Guide</h3>
+            <p className="text-xs text-gray-300">
+              React project mein ErrorTrackr integrate karne ke liye 3 simple steps follow karein.
+            </p>
+          </div>
+
+          {reactSteps.map((step, index) => (
+            <StepCard
+              key={step.id}
+              step={step}
+              index={index}
+              isExpanded={expandedStep === step.id}
+              onToggle={() => toggleStep(step.id)}
+              onCopy={handleCopyCode}
+            />
+          ))}
+
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <h4 className="text-xs font-medium text-white mb-2 flex items-center gap-2">
+                <FiCheck className="text-green-400" size={14} /> What This Does
+              </h4>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li>• Component errors → ErrorBoundary</li>
+                <li>• Global JS errors → window.onerror</li>
+                <li>• Promise rejections → unhandledrejection</li>
+                <li>• All errors → Your backend endpoint</li>
+              </ul>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+              <h4 className="text-xs font-medium text-white mb-2 flex items-center gap-2">
+                <FiZap className="text-violet-400" size={14} /> Pro Tips
+              </h4>
+              <ul className="text-xs text-gray-400 space-y-1">
+                <li>• API keys ko <code className="bg-white/10 px-1 rounded">.env</code> mein store karein</li>
+                <li>• Development/Production URLs alag rakhein</li>
+                <li>• ErrorBoundary ko sirf root level par use karein</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ BACKEND TAB */}
+      {activeDocTab === 'backend' && (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+            <FiClock className="text-amber-400" size={28} />
+          </div>
+          <h3 className="text-lg font-semibold text-white mb-2">{backendContent.title}</h3>
+          <p className="text-gray-400 text-sm mb-6">{backendContent.description}</p>
+          
+          <div className="max-w-md mx-auto bg-slate-950/50 border border-white/10 rounded-xl p-4 text-left">
+            <pre className="text-xs text-gray-400 whitespace-pre-wrap font-mono">
+              {backendContent.message}
+            </pre>
+          </div>
+
+          <div className="mt-6 flex justify-center gap-3">
+            <button className="px-4 py-2 bg-violet-600/20 hover:bg-violet-600/30 border border-violet-500/30 rounded-lg text-sm text-violet-400 transition-all flex items-center gap-2">
+              <FiBell size={14} /> Notify Me When Ready
+            </button>
+            <button className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-gray-300 transition-all flex items-center gap-2">
+              <FiBook size={14} /> View Frontend Docs
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Common Help Section */}
+      <div className="mt-8 pt-6 border-t border-white/10">
+        <h4 className="text-sm font-medium text-white mb-3">❓ Need Help?</h4>
+        <div className="flex flex-wrap gap-2">
+          <button className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-gray-300 hover:text-white transition-all flex items-center gap-1.5">
+            <FiMessageCircle size={12} /> Chat Support
+          </button>
+          <button className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-gray-300 hover:text-white transition-all flex items-center gap-1.5">
+            <FiGithub size={12} /> GitHub Issues
+          </button>
+          <button className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-gray-300 hover:text-white transition-all flex items-center gap-1.5">
+            <FiVideo size={12} /> Video Tutorial
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 export default Dashboard;
