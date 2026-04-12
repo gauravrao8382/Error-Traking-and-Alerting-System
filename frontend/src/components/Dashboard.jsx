@@ -1180,8 +1180,7 @@ const SettingsContent = ({ user }) => {
               </>)}
               {forgotStep === 2 && (<>
                 <p className="text-sm text-gray-400">OTP sent to <span className="text-violet-400">{forgotEmail}</span></p>
-                <p className="text-xs text-gray-500">Demo: <span className="text-green-400 font-mono">123456</span></p>
-                <input type="text" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="123456" maxLength={6} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-center tracking-widest text-sm" required />
+                <input type="text" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="• • • •" maxLength={6} className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 text-center tracking-widest text-sm" required />
                 <button type="submit" className="w-full py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-xl font-medium text-white text-sm">Verify</button>
               </>)}
               {forgotStep === 3 && (<>
