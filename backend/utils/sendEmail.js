@@ -1,28 +1,26 @@
 import nodemailer from "nodemailer";
-
 export const sendEmail = async (email, otp) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
+      service: "gmail",
       auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS,
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       }
     });
 
+    
     const info = await transporter.sendMail({
-      from: `"Error-Tracker" <${process.env.BREVO_USER}>`,
+      from: `"Error-Tracker" <${process.env.EMAIL_USER}>`, // ✅ FIXED
       to: email,
-      subject: "Error-Tracker - OTP Verification",
+      subject: "Error-Tracker - Email Verification OTP",
       text: `Your OTP is: ${otp}`
     });
 
     console.log("✅ Email sent:", info.response);
 
   } catch (error) {
-    console.log("❌ EMAIL ERROR:", error.message);
+    console.log("❌ EMAIL ERROR:", error); // 🔥 THIS WILL SHOW REAL ISSUE
     throw error;
   }
 };
