@@ -1,28 +1,33 @@
-import nodemailer from "nodemailer";
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
+import authRoutes from "./routes/authRoutes.js";
 
-export const sendEmail = async (email, otp) => {
+dotenv.config();
+
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+
+app.use(authRoutes);
+
+const startServer = async () => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS,
-      },
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("🌐 Atlas DB connected");
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log("Server running on", PORT);
     });
 
-    const info = await transporter.sendMail({
-      from: `"Error-Tracker" <${process.env.BREVO_USER}>`,
-      to: email,
-      subject: "Error-Tracker - OTP Verification",
-      text: `Your OTP is: ${otp}`,
-    });
-
-    console.log("✅ Email sent successfully:", info.response);
-
-  } catch (error) {
-    console.log("❌ EMAIL ERROR:", error.message);
-    throw error;
+  } catch (err) {
+    console.error("❌ DB Error:", err);
+    process.exit(1); 
   }
 };
+
+startServer();
+

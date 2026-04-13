@@ -182,7 +182,6 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ Update fields
     user.name = name || user.name;
     user.userType = userType || user.userType;
 
@@ -229,7 +228,7 @@ export const createProject = async (req, res) => {
   try {
     const { name, userId } = req.body;
 
-    const apiKey = generateApiKey(); // 🔥
+    const apiKey = generateApiKey(); 
 
     const project = await Project.create({
       name,
@@ -239,7 +238,6 @@ export const createProject = async (req, res) => {
 
     const projects = await Project.find({ userId });
 
-    // ✅ Step 3: Send all projects
     res.status(201).json(projects);
 
   } catch (err) {
@@ -251,15 +249,13 @@ export const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1️⃣ Delete project
     const project = await Project.findByIdAndDelete(id);
 
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    // // 2️⃣ Delete all related errors
-    // await Error.deleteMany({ projectId: project._id });
+    await Error.deleteMany({ projectId: project._id });
 
     res.status(200).json({
       message: "Project & related errors deleted successfully"
@@ -303,8 +299,6 @@ export const logError = async (req, res) => {
     if (!project) {
       return res.status(400).json({ message: "Invalid API key" });
     }
-
-    // 🔍 Check if same error already exists
     const existingError = await Error.findOne({
       projectId: project._id,
       message,
@@ -314,7 +308,6 @@ export const logError = async (req, res) => {
     });
 
     if (existingError) {
-      // 🔁 Update only timestamp + increment count
       existingError.count = (existingError.count || 1) + 1;
       existingError.status = "Active";
       project.activeErrors = (project.activeErrors || 0) + 1;
@@ -328,7 +321,6 @@ export const logError = async (req, res) => {
     }
 
     const userId= project.userId;
-    // 🆕 Create new error
     const error = await Error.create({
       userId,
       projectId: project._id,
@@ -340,7 +332,7 @@ export const logError = async (req, res) => {
       stack,
       count: 1
     });
-    // 🚀 Update project error counts
+   
     project.totalErrors = (project.totalErrors || 0) + 1;
     project.activeErrors = (project.activeErrors || 0) + 1;
     await project.save();

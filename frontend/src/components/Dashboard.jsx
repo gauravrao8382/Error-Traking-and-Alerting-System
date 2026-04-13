@@ -844,7 +844,13 @@ const ErrorsContent = ({ user }) => {
       const res = await axios.post("http://localhost:5000/createproject", {
         name: newProjectName.trim(), color: newProjectColor, userId: user._id,
       }, { headers: { Authorization: `Bearer ${token}` }});
-      setProjects(prev => [...prev, res.data]);
+
+      const newProject = {
+        name: newProjectName.trim(),
+        color: newProjectColor,
+        userId: user._id,
+      };
+      setProjects(prev => [...prev, newProject]);
       setNewProjectName(''); setShowCreateModal(false);
       successToast("Project created successfully!");
     } catch (error) {
