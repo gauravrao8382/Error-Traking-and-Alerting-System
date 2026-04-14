@@ -15,8 +15,9 @@ app.use(authRoutes);
 
 const startServer = async () => {
   try {
+    
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("🌐 Atlas DB connected");
+    console.log("🌐 Atlas connected");
 
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
