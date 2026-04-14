@@ -56,7 +56,7 @@ const Signup = ({ setUser }) => {
       }
       
       setSending(true);
-      const res = await axios.post('https://error-traking-and-alerting-system.onrender.com/send-otp', { email: formData.email });
+      const res = await axios.post(`${API}/send-otp`, { email: formData.email });
       successToast(res.data.message || "OTP sent successfully");
       setStep(2);
     } catch (err) {
