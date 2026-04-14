@@ -1,9 +1,13 @@
 // src/components/DeveloperSection.jsx
 import React from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiGithub, FiLinkedin, FiMail, FiCode } from 'react-icons/fi';
 
 const DeveloperSection = () => {
+    useEffect(() => {
+  document.title = "Developer";
+}, []);
   // ✅ Replace with your actual photo URL
   const imageUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=Gaurav&backgroundColor=b6e3f4";
 

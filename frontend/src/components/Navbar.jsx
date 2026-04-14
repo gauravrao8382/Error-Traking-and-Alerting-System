@@ -12,8 +12,12 @@ const Navbar = () => {
         {/* ✅ Responsive Height & Layout */}
         <div className="flex items-center justify-between h-16 sm:h-20">
           
-          {/* LOGO */}
-          <Link to="/" className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+          {/* ✅ LOGO - Click to scroll to top */}
+          <Link 
+            to="/" 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent cursor-pointer"
+          >
             ErrorTrackr
           </Link>
 
@@ -23,7 +27,6 @@ const Navbar = () => {
             <a href="/#about" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">About</a>
             <a href="/#pricing" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">Pricing</a>
             <a href="/#contact" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">Contact</a>
-            {/* ✅ Developer Link - Exact same pattern */}
             <a href="/#developer" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">Developer</a>
           </div>
 

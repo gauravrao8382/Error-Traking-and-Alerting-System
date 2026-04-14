@@ -1,7 +1,11 @@
 import React from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const About = () => {
+  useEffect(() => {
+    document.title = "About";
+  }, []);
   return (
     <section id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-slate-900/50">
       <div className="max-w-7xl mx-auto">

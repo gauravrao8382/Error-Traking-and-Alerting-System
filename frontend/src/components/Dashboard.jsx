@@ -24,6 +24,9 @@ const SidebarItems = [
 
 // ✅ MAIN DASHBOARD COMPONENT
 const Dashboard = ({ user, setUser }) => {
+  useEffect(() => {
+  document.title = "Dashboard";
+}, []);
   const navigate = useNavigate();
   const API = "https://gregarious-amazement-production-179e.up.railway.app";
   // ✅ Separate states for Mobile vs Desktop

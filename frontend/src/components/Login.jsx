@@ -9,6 +9,9 @@ import axios from 'axios';
 import { successToast, errorToast } from '../utils/Toast';
 
 const Login = ({ setUser }) => {
+  useEffect(() => {
+  document.title = "Login";
+}, []);
   const API = "https://gregarious-amazement-production-179e.up.railway.app";
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });

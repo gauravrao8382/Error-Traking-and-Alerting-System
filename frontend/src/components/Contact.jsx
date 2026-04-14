@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiMail, FiMessageSquare, FiMapPin } from 'react-icons/fi';
 
 const Contact = () => {
+  useEffect(() => {
+  document.title = "Contact";
+}, []);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
 
   const handleSubmit = (e) => {

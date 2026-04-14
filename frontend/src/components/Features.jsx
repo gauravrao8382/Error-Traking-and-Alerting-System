@@ -1,8 +1,12 @@
 import React from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiZap, FiLayers, FiBarChart, FiShield, FiGlobe, FiUsers } from 'react-icons/fi';
 
 const Features = () => {
+  useEffect(() => {
+  document.title = "Features";
+}, []);
   const features = [
     { icon: FiZap, title: 'Real-time Alerts', desc: 'Get instant notifications via Email, Slack, or Discord.' },
     { icon: FiLayers, title: 'Smart Grouping', desc: 'Similar errors automatically grouped together.' },

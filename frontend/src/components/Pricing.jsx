@@ -1,8 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FiCheck } from 'react-icons/fi';
+import { useEffect } from 'react';
 
 const Pricing = () => {
+  useEffect(() => {
+  document.title = "Pricing";
+}, []);
   const plans = [
     { name: 'Starter', price: 'Free', features: ['1,000 errors/month', '1 Project', 'Email Alerts', '7-day Data Retention', 'Community Support'] },
     { name: 'Pro', price: '₹999/mo', popular: true, features: ['50,000 errors/month', '10 Projects', 'Slack + Discord Alerts', '30-day Data Retention', 'Priority Support', 'Team Collaboration'] },

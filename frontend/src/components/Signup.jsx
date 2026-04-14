@@ -22,6 +22,10 @@ const InputField = ({ label, icon: Icon, ...props }) => (
 )
 
 const Signup = ({ setUser }) => {
+  useEffect(() => {
+    document.title = "SignUp";
+  }, []);
+
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [sending, setSending] = useState(false);

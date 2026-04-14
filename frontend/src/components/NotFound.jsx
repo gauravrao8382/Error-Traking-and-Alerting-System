@@ -5,6 +5,9 @@ import { motion } from 'framer-motion';
 import { FiHome, FiArrowLeft, FiAlertTriangle } from 'react-icons/fi';
 
 const NotFound = () => {
+    useEffect(() => {
+  document.title = "Not Found";
+}, []);
   const navigate = useNavigate();
   const location = useLocation();
 

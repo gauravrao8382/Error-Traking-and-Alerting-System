@@ -1,9 +1,13 @@
 import React from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiArrowRight, FiPlay } from 'react-icons/fi';
 
 const Hero = () => {
+  useEffect(() => {
+  document.title = "Home";
+}, []);
   return (
     <section className="pt-26 pb-20 px-4 bg-slate-950">
       <div className="max-w-7xl mx-auto">
