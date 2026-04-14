@@ -49,7 +49,7 @@ export const sendEmail = async (email, otp) => {
             <div class="otp-code">${otp}</div>
           </div>
           
-          <p><strong>This OTP is valid for 10 minutes.</strong></p>
+          <p><strong>This OTP is valid for 5 minutes.</strong></p>
           
           <div class="note">
             💡 <strong>Tip:</strong> If you didn't request this code, please ignore this email. Your account remains secure.
