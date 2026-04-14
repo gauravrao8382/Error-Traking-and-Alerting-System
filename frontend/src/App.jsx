@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Features from './components/Features';
+import Developer from './components/DeveloperSection';
 import About from './components/About';
 import Contact from './components/Contact';
 import Pricing from './components/Pricing';
@@ -72,6 +73,7 @@ function App() {
               <Navbar />
               <Hero />
               <Features />
+              <Developer />
               <About />
               <Contact />
               <Pricing />

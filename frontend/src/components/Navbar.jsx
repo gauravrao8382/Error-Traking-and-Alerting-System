@@ -23,6 +23,8 @@ const Navbar = () => {
             <a href="/#about" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">About</a>
             <a href="/#pricing" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">Pricing</a>
             <a href="/#contact" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">Contact</a>
+            {/* ✅ Developer Link - Exact same pattern */}
+            <a href="/#developer" className="text-gray-300 hover:text-violet-400 transition-colors text-sm lg:text-base">Developer</a>
           </div>
 
           {/* DESKTOP BUTTONS */}
@@ -57,6 +59,7 @@ const Navbar = () => {
               <a href="/#about" onClick={() => setIsOpen(false)} className="py-3 px-4 text-gray-300 hover:text-violet-400 hover:bg-white/5 rounded-xl transition-all text-base font-medium">About</a>
               <a href="/#pricing" onClick={() => setIsOpen(false)} className="py-3 px-4 text-gray-300 hover:text-violet-400 hover:bg-white/5 rounded-xl transition-all text-base font-medium">Pricing</a>
               <a href="/#contact" onClick={() => setIsOpen(false)} className="py-3 px-4 text-gray-300 hover:text-violet-400 hover:bg-white/5 rounded-xl transition-all text-base font-medium">Contact</a>
+              <a href="/#developer" onClick={() => setIsOpen(false)} className="py-3 px-4 text-gray-300 hover:text-violet-400 hover:bg-white/5 rounded-xl transition-all text-base font-medium">Developer</a>
 
               <div className="pt-4 mt-2 border-t border-white/10 flex flex-col space-y-3">
                 <Link to="/login" onClick={() => setIsOpen(false)} className="py-3 px-4 border border-violet-500/50 text-violet-400 rounded-xl text-center hover:bg-violet-500/10 transition-all font-medium text-base">
