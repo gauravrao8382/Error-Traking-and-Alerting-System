@@ -13,6 +13,8 @@ import Login from './components/Login';
 import Signup from './components/Signup';
 import Dashboard from './components/Dashboard';
 import Footer from './components/Footer';
+import NotFound from './components/NotFound';
+
 
 function App() {
 
@@ -100,6 +102,7 @@ function App() {
             <Dashboard setUser={setUser} user={user} />
           ) : <Navigate to="/login" />} />
 
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </Router>

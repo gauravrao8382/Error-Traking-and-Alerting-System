@@ -25,7 +25,7 @@ const SidebarItems = [
 // ✅ MAIN DASHBOARD COMPONENT
 const Dashboard = ({ user, setUser }) => {
   const navigate = useNavigate();
-  
+  const API = "https://gregarious-amazement-production-179e.up.railway.app";
   // ✅ Separate states for Mobile vs Desktop
   const [isMobileOpen, setIsMobileOpen] = useState(false);      // Mobile: Sidebar open/close
   const [isCollapsed, setIsCollapsed] = useState(false);         // Desktop: Sidebar collapsed/expanded
@@ -269,6 +269,9 @@ const Dashboard = ({ user, setUser }) => {
 
 // ✅ Overview Content (Same as before, just ensuring imports are correct)
 const OverviewContent = ({user, setActiveTab}) => {
+
+  const API = "https://gregarious-amazement-production-179e.up.railway.app";
+
     const [errors, setErrors] = useState([]);
     
     useEffect(() => {
@@ -276,7 +279,7 @@ const OverviewContent = ({user, setActiveTab}) => {
       const fetchErrors = async () => {
           try {
             const token = localStorage.getItem("token");
-            const res = await axios.get(`http://localhost:5000/getUserErrors/${user._id}`, {
+            const res = await axios.get(`${API}/getUserErrors/${user._id}`, {
               headers: { Authorization: `Bearer ${token}` }
             });
             setErrors(res.data);
@@ -432,6 +435,9 @@ const OverviewContent = ({user, setActiveTab}) => {
 
 // ✅ Profile Component - SCHEMA MATCHED + Responsive
 const ProfileContent = ({ user, setUser }) => {
+
+  const API = "https://gregarious-amazement-production-179e.up.railway.app";
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ ...user });
   const [showSuccess, setShowSuccess] = useState(false);
@@ -454,7 +460,7 @@ const ProfileContent = ({ user, setUser }) => {
       try {
         const token = localStorage.getItem("token");
         const res = await axios.put(
-          `http://localhost:5000/update-profile/${user._id}`,
+          `${API}/update-profile/${user._id}`,
           formData,
           {
             headers: {
@@ -791,6 +797,9 @@ const ProfileContent = ({ user, setUser }) => {
 
 // ✅ Errors Component
 const ErrorsContent = ({ user }) => {
+
+  const API = "https://gregarious-amazement-production-179e.up.railway.app";
+
   const [projects, setProjects] = useState([]);
   const [errors, setErrors] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -802,7 +811,7 @@ const ErrorsContent = ({ user }) => {
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:5000/projects/${user._id}`, {
+        const res = await axios.get(`${API}/projects/${user._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProjects(res.data);
@@ -816,7 +825,7 @@ const ErrorsContent = ({ user }) => {
     const fetchErrors = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get(`http://localhost:5000/geterrors/${selectedProject._id}`, {
+        const res = await axios.get(`${API}/geterrors/${selectedProject._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setErrors(res.data);
@@ -831,7 +840,7 @@ const ErrorsContent = ({ user }) => {
       if (!error) return;
       const newStatus = error.status === "Resolved" ? "Active" : "Resolved";
       const token = localStorage.getItem("token");
-      await axios.patch(`http://localhost:5000/resolve-error/${errorId}`, { status: newStatus }, { headers: { Authorization: `Bearer ${token}` }});
+      await axios.patch(`${API}/resolve-error/${errorId}`, { status: newStatus }, { headers: { Authorization: `Bearer ${token}` }});
       setErrors(prevErrors => prevErrors.map(err => err._id === errorId ? { ...err, status: newStatus } : err));
     } catch (error) { console.error("Toggle error:", error); }
   };
@@ -841,7 +850,7 @@ const ErrorsContent = ({ user }) => {
     if (!newProjectName.trim()) return;
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/createproject", {
+      const res = await axios.post(`${API}/createproject`, {
         name: newProjectName.trim(), color: newProjectColor, userId: user._id,
       }, { headers: { Authorization: `Bearer ${token}` }});
 
@@ -863,7 +872,7 @@ const ErrorsContent = ({ user }) => {
     if(!confirm("Delete this project?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/delete/${projectId}`, { headers: { Authorization: `Bearer ${token}` }});
+      await axios.delete(`${API}/delete/${projectId}`, { headers: { Authorization: `Bearer ${token}` }});
       setProjects(prev => prev.filter(p => p._id !== projectId));
       if (selectedProject?._id === projectId) setSelectedProject(null);
       successToast("Project deleted successfully!");
@@ -1051,6 +1060,9 @@ const ErrorsContent = ({ user }) => {
 
 // ✅ Settings Component
 const SettingsContent = ({ user }) => {
+
+  const API = "https://gregarious-amazement-production-179e.up.railway.app";
+
   const [activeSecurityTab, setActiveSecurityTab] = useState('change-password');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotStep, setForgotStep] = useState(1);
@@ -1096,7 +1108,7 @@ const SettingsContent = ({ user }) => {
         const token = localStorage.getItem("token");
 
         const res = await axios.patch(
-          `http://localhost:5000/change-password/${user._id}`,
+          `${API}/change-password/${user._id}`,
           {
             currentPassword,
             newPassword: newPass,
@@ -1124,7 +1136,7 @@ const SettingsContent = ({ user }) => {
   try {
     if (forgotStep === 1) {
       
-      await axios.post("http://localhost:5000/send-otp", {
+      await axios.post(`${API}/send-otp`, {
         email: forgotEmail,
       });
 
@@ -1134,7 +1146,7 @@ const SettingsContent = ({ user }) => {
 
     else if (forgotStep === 2) {
         try {
-          await axios.post("http://localhost:5000/verify-otp", {
+          await axios.post(`${API}/verify-otp`, {
             email: forgotEmail,
             otp,
           });
@@ -1153,7 +1165,7 @@ const SettingsContent = ({ user }) => {
       if (newPassword.length < 6) {
         return errorToast("Min 6 characters required");
       }
-      await axios.patch("http://localhost:5000/reset-password", {
+      await axios.patch(`${API}/reset-password`, {
         email: forgotEmail,
         newPassword,
       });
@@ -1267,6 +1279,9 @@ const AnalyticsContent = () => (
 
 // ✅ User Manual Component - Step-by-Step Integration Guide
 const UserManualContent = () => {
+
+  const API = "https://gregarious-amazement-production-179e.up.railway.app";
+
   const [activeDocTab, setActiveDocTab] = useState('javascript');
   const [copiedCode, setCopiedCode] = useState(null);
   const [expandedStep, setExpandedStep] = useState(null);
@@ -1304,7 +1319,7 @@ const UserManualContent = () => {
       code: `window.onerror = function (message, source, lineno, colno, error) {
   console.log("🔥 Error captured:", message);
   
-  fetch("http://localhost:5000/errors", {
+  fetch("${API}/errors", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -1357,7 +1372,7 @@ class ErrorBoundary extends React.Component {
     }
 
     // 🔥 Send to backend
-    fetch("http://localhost:5000/errors", {
+    fetch("${API}/errors", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -1411,7 +1426,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 // 🔥 Global JS Errors
 window.onerror = function (message, source, lineno, colno, error) {
-  fetch("http://localhost:5000/errors", {
+  fetch("${API}/errors", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -1452,7 +1467,7 @@ window.addEventListener("unhandledrejection", function (event) {
     }
   }
 
-  fetch("http://localhost:5000/errors", {
+  fetch("${API}/errors", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

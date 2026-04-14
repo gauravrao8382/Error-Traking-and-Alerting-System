@@ -5,7 +5,7 @@ import { FiEye, FiEyeOff, FiUser, FiBriefcase, FiBook, FiMapPin, FiCalendar, FiC
 import axios from 'axios';
 import { successToast, errorToast } from "../utils/Toast";
 
-const API = "http://localhost:5000";
+const API = "https://gregarious-amazement-production-179e.up.railway.app";
 
 // ✅ Reusable Input Component (Outside main component)
 const InputField = ({ label, icon: Icon, ...props }) => (

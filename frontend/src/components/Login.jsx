@@ -9,7 +9,7 @@ import axios from 'axios';
 import { successToast, errorToast } from '../utils/Toast';
 
 const Login = ({ setUser }) => {
-  const API = "http://localhost:5000";
+  const API = "https://gregarious-amazement-production-179e.up.railway.app";
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   
