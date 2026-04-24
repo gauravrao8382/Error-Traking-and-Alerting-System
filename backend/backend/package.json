@@ -1,10 +1,4 @@
 {
-<<<<<<< HEAD
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.3",
-    "cors": "^2.8.6",
-=======
   "name": "error-tracker-backend",
   "version": "1.0.0",
   "main": "server.js",
@@ -18,7 +12,6 @@
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "crypto": "^1.0.1",
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",

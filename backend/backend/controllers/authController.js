@@ -11,7 +11,7 @@ import { generateApiKey } from "../utils/generateAPI.js";
 export const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
-//middleware
+
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     console.log("Generated OTP:", otp);
     let user = await User.findOne({ email });
@@ -72,9 +72,6 @@ export const verifyOtp = async (req, res) => {
 
 export const completeSignup = async (req, res) => {
   try {
-<<<<<<< HEAD
-    const { email, name, password, location, experience } = req.body;
-=======
     const {
       email,
       name,
@@ -86,43 +83,21 @@ export const completeSignup = async (req, res) => {
       experience,
       address,
     } = req.body;
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
 
-    // 🔍 check user exists
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-<<<<<<< HEAD
-    // 🔒 check OTP verified
-=======
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
     if (!user.isVerified) {
       return res.status(400).json({ message: "Please verify OTP first" });
     }
 
-<<<<<<< HEAD
-    // 🚫 prevent re-signup
-=======
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
     if (user.name) {
       return res.status(400).json({ message: "Signup already completed" });
     }
 
-<<<<<<< HEAD
-    // 🔐 hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 🧠 update user fields (only schema fields)
-    user.name = name;
-    user.password = hashedPassword;
-    user.location = location;
-    user.experience = experience;
-
-    // 🧹 clear OTP
-=======
     const hashedPassword = await bcrypt.hash(password, 10);
 
     user.name = name;
@@ -133,26 +108,17 @@ export const completeSignup = async (req, res) => {
     user.company = company;
     user.experience = experience;
     user.address = address;
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
     user.otp = undefined;
     user.otpExpiry = undefined;
 
     await user.save();
 
-<<<<<<< HEAD
-    // 🎟️ generate token
-=======
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
     const token = generateToken(user);
 
     res.status(200).json({
       message: "Signup completed successfully ✅",
       token,
-<<<<<<< HEAD
-      user
-=======
       user,
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
     });
 
   } catch (err) {
@@ -167,11 +133,6 @@ export const login = async (req, res) => {
 
     console.log("Login attempt for email:", email);
 
-<<<<<<< HEAD
-    const { email } = req.body;
-    console.log("Login attempt for email:", email);
-=======
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
     const user = await User.findOne({ email });
 
     if (!user) {

@@ -1,29 +1,3 @@
-<<<<<<< HEAD
-import nodemailer from "nodemailer";
-export const sendEmail = async (email, otp) => {
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      }
-    });
-
-    
-    const info = await transporter.sendMail({
-      from: `"Collab-Hub" <${process.env.EMAIL_USER}>`, // ✅ FIXED
-      to: email,
-      subject: "Collab-Hub - Email Verification OTP",
-      text: `Your OTP is: ${otp}`
-    });
-
-    console.log("✅ Email sent:", info.response);
-
-  } catch (error) {
-    console.log("❌ EMAIL ERROR:", error); // 🔥 THIS WILL SHOW REAL ISSUE
-    throw error;
-=======
 
 import axios from "axios";
 
@@ -120,6 +94,5 @@ export const sendEmail = async (email, otp) => {
   } catch (error) {
     console.log("❌ EMAIL ERROR:", error.response?.data || error.message);
     return false;
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
   }
 };

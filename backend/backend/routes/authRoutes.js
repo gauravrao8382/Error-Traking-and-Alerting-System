@@ -1,9 +1,5 @@
 import express from "express";
-<<<<<<< HEAD
-import { sendOtp, verifyOtp, completeSignup, login} from "../controllers/authController.js";
-=======
 import { sendOtp, verifyOtp, completeSignup, login, updateProfile, createProject, getProjects, deleteProject, logError, getUserErrors, getErrors, resolveError, changePassword, resetPassword} from "../controllers/authController.js";
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
 import {authMiddleware} from "../middlewares/authMiddleware.js";
 import { get } from "mongoose";
 const router = express.Router();

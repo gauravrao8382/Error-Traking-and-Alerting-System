@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-<<<<<<< HEAD
-import { motion } from 'framer-motion';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
-
-const API = "http://localhost:5000"; // change if needed
-=======
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiEye, FiEyeOff, FiUser, FiBriefcase, FiBook, FiMapPin, FiCalendar, FiCheck, FiX, FiAlertCircle } from 'react-icons/fi';
 import axios from 'axios';
@@ -33,7 +25,6 @@ const Signup = ({ setUser }) => {
   useEffect(() => {
     document.title = "SignUp";
   }, []);
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
 
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -41,109 +32,21 @@ const Signup = ({ setUser }) => {
   const [verifying, setVerifying] = useState(false);
 
 
-<<<<<<< HEAD
-  // 🔥 Loading states
-  const [sending, setSending] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-
-=======
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
   const [formData, setFormData] = useState({
     email: '',
     otp: '',
     name: '',
     password: '',
-<<<<<<< HEAD
-    location: '',
-    experience: ''
-=======
     userType: 'student',
     college: '',
     course: '',
     company: '',
     experience: '',
     address: ''
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
   });
 
   const navigate = useNavigate();
 
-<<<<<<< HEAD
-  // 🔹 Send OTP
-  const sendOTP = async () => {
-  try {
-    if (!formData.email) {
-      return alert("Please enter email");
-    }
-
-    // simple email validation
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(formData.email)) {
-      return alert("Enter valid email");
-    }
-
-    setSending(true);
-
-    const res = await axios.post(`${API}/send-otp`, {
-      email: formData.email,
-    });
-
-    alert(res.data.message);
-    setStep(2);
-
-  } catch (err) {
-    alert(err.response?.data?.message || "Error sending OTP");
-  } finally {
-    setSending(false);
-  }
-};
-  // 🔹 Resend OTP
-  const resendOTP = async () => {
-    setSending(true);
-    await axios.post(`${API}/send-otp`, { email: formData.email });
-    alert("OTP resent");
-    setSending(false);
-  };
-
-  // 🔹 Verify OTP
-  const verifyOTP = async () => {
-  try {
-    setVerifying(true);
-
-    const res = await axios.post(`${API}/verify-otp`, {
-      email: formData.email,
-      otp: formData.otp
-    });
-
-    alert(res.data.message);
-    setStep(3);
-
-  } catch (err) {
-    alert(err.response?.data?.message || "Invalid OTP");
-  } finally {
-    setVerifying(false);
-  }
-};
-
-  // 🔹 Final Submit
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
-    const res = await axios.post(`${API}/complete-signup`, formData);
-
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user)); // 🔥 FIX
-
-    alert("Account created successfully ✅");
-
-    navigate('/dashboard');
-
-  } catch (err) {
-    alert(err.response?.data?.message || "Signup failed");
-  }
-};
-=======
   const sendOTP = async () => {
     try {
       if (!formData.email) {
@@ -229,7 +132,6 @@ const handleSubmit = async (e) => {
       errorToast(err.response?.data?.message || "Signup failed");
     }
   };
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
 
   return (
     <section className="pt-24 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 min-h-screen flex items-center justify-center bg-slate-950">
@@ -246,9 +148,6 @@ const handleSubmit = async (e) => {
             <p className="text-gray-400 text-sm sm:text-base">Step <span className="text-violet-400 font-semibold">{step}</span> of 3</p>
           </div>
 
-<<<<<<< HEAD
-          {/* STEP 1 */}
-=======
           {/* Progress Indicator */}
           <div className="flex items-center justify-center gap-2 mb-6 sm:mb-8">
             {[1, 2, 3].map((s) => (
@@ -266,7 +165,6 @@ const handleSubmit = async (e) => {
           </div>
 
           {/* STEP 1: Email */}
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
           {step === 1 && (
             <div className="space-y-5 sm:space-y-6">
               <InputField
@@ -277,16 +175,6 @@ const handleSubmit = async (e) => {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
-<<<<<<< HEAD
-
-              <button
-                onClick={sendOTP}
-                disabled={sending}
-                className={`w-full py-3 rounded-lg bg-gradient-to-r from-primary to-secondary 
-                ${sending ? "opacity-60 cursor-not-allowed" : ""}`}
-              >
-                {sending ? "Sending OTP..." : "Send OTP"}
-=======
               <button
                 onClick={sendOTP}
                 disabled={sending}
@@ -300,31 +188,10 @@ const handleSubmit = async (e) => {
                     Sending OTP...
                   </span>
                 ) : "Send OTP"}
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
               </button>
             </div>
           )}
 
-<<<<<<< HEAD
-          {/* STEP 2 */}
-          {step === 2 && (
-            <div className="space-y-6">
-              <input
-                type="text"
-                placeholder="Enter OTP"
-                value={formData.otp}
-                onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
-                className="w-full px-4 py-3 bg-darker border border-white/10 rounded-lg"
-              />
-
-              <button
-                onClick={verifyOTP}
-                disabled={verifying}
-                className={`w-full py-3 rounded-lg bg-gradient-to-r from-primary to-secondary 
-                ${verifying ? "opacity-60 cursor-not-allowed" : ""}`}
-              >
-                {verifying ? "Verifying..." : "Verify OTP"}
-=======
           {/* STEP 2: OTP Verification */}
           {step === 2 && (
             <div className="space-y-5 sm:space-y-6">
@@ -352,30 +219,17 @@ const handleSubmit = async (e) => {
                     Verifying...
                   </span>
                 ) : "Verify OTP"}
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
               </button>
               <p className="text-sm text-center text-gray-400">
-<<<<<<< HEAD
-                Didn’t receive OTP?{" "}
-                <span
-                  onClick={resendOTP}
-                  className="text-primary cursor-pointer hover:underline"
-                >
-=======
                 Didn't receive OTP?{' '}
                 <span onClick={resendOTP} className="text-violet-400 hover:text-violet-300 cursor-pointer font-medium transition-colors">
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
                   Resend OTP
                 </span>
               </p>
             </div>
           )}
 
-<<<<<<< HEAD
-          {/* STEP 3 */}
-=======
           {/* STEP 3: Profile Details */}
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
           {step === 3 && (
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <InputField
@@ -388,25 +242,6 @@ const handleSubmit = async (e) => {
                 required
               />
 
-<<<<<<< HEAD
-              <input
-                type="text"
-                placeholder="Location (City, Country)"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-3 bg-darker border border-white/10 rounded-lg"
-                required
-              />
-
-              <input
-                type="number"
-                placeholder="Years of Experience"
-                value={formData.experience}
-                onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                className="w-full px-4 py-3 bg-darker border border-white/10 rounded-lg"
-                required
-              />
-=======
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-3">I am a...</label>
                 <div className="grid grid-cols-2 gap-3 p-1 bg-slate-900/50 rounded-xl border border-white/10">
@@ -497,7 +332,6 @@ const handleSubmit = async (e) => {
                   </motion.div>
                 )}
               </AnimatePresence>
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">

@@ -1,37 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-<<<<<<< HEAD
-import { motion } from 'framer-motion';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
-import axios from 'axios';
-
- 
-const Login = ({setUser}) => {
-  const API = "http://localhost:5000";
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const navigate = useNavigate();
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
-    const res = await axios.post(`${API}/login`, {
-      email: formData.email
-    });
-
-    // ✅ save token + user
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    console.log("Login successful, token and user saved to localStorage");
-    setUser(res.data.user);
-    navigate('/dashboard');
-
-  } catch (err) {
-    alert(err.response?.data?.message || "Login failed");
-  }
-};
-=======
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiMail, FiLock, FiEye, FiEyeOff, FiX, FiArrowLeft, 
@@ -217,7 +185,6 @@ const Login = ({ setUser }) => {
     setShowForgotModal(false);
     resetForgotForm();
   };
->>>>>>> 0f5f3c2ec6ed9ce15abb36f9233fc8f6426f5771
 
   return (
     <>

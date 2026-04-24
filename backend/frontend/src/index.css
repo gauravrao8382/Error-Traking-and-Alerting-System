@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* 🌌 Base */
+body {
+  background: #070a12;
+  color: #f9fafb;
+  font-family: 'Inter', sans-serif;
+}
+
+/* 🎨 Gradient Text */
+.gradient-text {
+  background: linear-gradient(90deg, #ff4d6d, #7c3aed, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 🪄 Glass Card */
+.glass {
+  background: rgba(17, 24, 39, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ✨ Hover Glow */
+.glow-hover:hover {
+  box-shadow: 0 0 25px rgba(255, 77, 109, 0.5);
+  transform: translateY(-3px);
+}
+
+/* 📝 Input */
+.input-dark {
+  background: #111827;
+  border: 1px solid #374151;
+  color: #f9fafb;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.input-dark::placeholder {
+  color: #6b7280;
+}
+
+.input-dark:focus {
+  border-color: #ff4d6d;
+  box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.3);
+}
+
+/* 📊 Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#ff4d6d, #7c3aed);
+  border-radius: 10px;
+}
