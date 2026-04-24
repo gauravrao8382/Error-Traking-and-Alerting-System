@@ -7,7 +7,7 @@ import { generateToken } from "../utils/signin.js";
 export const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
-
+//middleware
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     console.log("Generated OTP:", otp);
     let user = await User.findOne({ email });
