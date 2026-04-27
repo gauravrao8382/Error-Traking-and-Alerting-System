@@ -1,22 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
 import { FiGithub, FiTwitter, FiLinkedin } from 'react-icons/fi';
 
 const Footer = () => {
   useEffect(() => {
-  document.title = "Home";
-}, []);
+    document.title = "Home";
+  }, []);
+
+  const linkClass =
+    "text-gray-400 hover:text-violet-400 transition-all duration-200 text-sm sm:text-base hover:translate-x-1 inline-block";
+
   return (
-    <footer className="bg-slate-900/50 border-t border-white/10 py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <footer className="bg-slate-900/50 border-t border-white/10 py-12 sm:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      
+      {/* subtle background glow */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-violet-500/5 to-fuchsia-500/5 pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
           
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent mb-4">
+            <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent mb-4 tracking-tight">
               ErrorTrackr
             </h3>
             <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
@@ -28,10 +35,10 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-white mb-4 text-base sm:text-lg">Product</h4>
             <ul className="space-y-3">
-              <li><a href="/#features" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Features</a></li>
-              <li><a href="/#pricing" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Pricing</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Documentation</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Changelog</a></li>
+              <li><a href="#features" className={linkClass}>Features</a></li>
+              <li><a href="#pricing" className={linkClass}>Pricing</a></li>
+              <li><a href="#" className={linkClass}>Documentation</a></li>
+              <li><a href="#" className={linkClass}>Changelog</a></li>
             </ul>
           </div>
 
@@ -39,10 +46,10 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-white mb-4 text-base sm:text-lg">Company</h4>
             <ul className="space-y-3">
-              <li><a href="/#about" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">About</a></li>
-              <li><a href="/#contact" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Contact</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Blog</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Careers</a></li>
+              <li><a href="#about" className={linkClass}>About</a></li>
+              <li><a href="#contact" className={linkClass}>Contact</a></li>
+              <li><a href="#" className={linkClass}>Blog</a></li>
+              <li><a href="#" className={linkClass}>Careers</a></li>
             </ul>
           </div>
 
@@ -50,9 +57,9 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-white mb-4 text-base sm:text-lg">Legal</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Privacy Policy</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Terms of Service</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-violet-400 transition-colors text-sm sm:text-base">Cookie Policy</a></li>
+              <li><a href="#" className={linkClass}>Privacy Policy</a></li>
+              <li><a href="#" className={linkClass}>Terms of Service</a></li>
+              <li><a href="#" className={linkClass}>Cookie Policy</a></li>
             </ul>
           </div>
         </div>
@@ -65,13 +72,25 @@ const Footer = () => {
           
           {/* Social Icons */}
           <div className="flex gap-4 sm:gap-5">
-            <a href="#" className="text-gray-400 hover:text-violet-400 hover:bg-white/10 p-2 rounded-lg transition-all" aria-label="GitHub">
+            <a 
+              href="#" 
+              className="text-gray-400 hover:text-violet-400 hover:bg-white/10 p-2 rounded-lg transition-all duration-200 hover:scale-110"
+              aria-label="GitHub"
+            >
               <FiGithub className="text-lg sm:text-xl" />
             </a>
-            <a href="#" className="text-gray-400 hover:text-violet-400 hover:bg-white/10 p-2 rounded-lg transition-all" aria-label="Twitter">
+            <a 
+              href="#" 
+              className="text-gray-400 hover:text-violet-400 hover:bg-white/10 p-2 rounded-lg transition-all duration-200 hover:scale-110"
+              aria-label="Twitter"
+            >
               <FiTwitter className="text-lg sm:text-xl" />
             </a>
-            <a href="#" className="text-gray-400 hover:text-violet-400 hover:bg-white/10 p-2 rounded-lg transition-all" aria-label="LinkedIn">
+            <a 
+              href="#" 
+              className="text-gray-400 hover:text-violet-400 hover:bg-white/10 p-2 rounded-lg transition-all duration-200 hover:scale-110"
+              aria-label="LinkedIn"
+            >
               <FiLinkedin className="text-lg sm:text-xl" />
             </a>
           </div>
