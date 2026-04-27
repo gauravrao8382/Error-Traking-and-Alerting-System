@@ -1,5 +1,4 @@
-import React from 'react';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const About = () => {
@@ -13,10 +12,12 @@ const About = () => {
           
           {/* Left Content */}
           <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-white leading-tight">
               Built by Developers,<br />
               <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">For Developers</span>
-            </h2>
+            </h1>
+
+            
             <p className="text-gray-400 text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
               We understand the pain of debugging in production. ErrorTrackr helps teams catch, understand, and fix errors before they impact users.
             </p>
